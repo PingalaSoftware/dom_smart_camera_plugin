@@ -1,15 +1,69 @@
 # dom_camera
 
-A new Flutter plugin project.
+Flutter plugin to control DOM Smart Cameras.
 
-## Getting Started
+## Available Widgets
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+#### cameraStreamWidget()
 
-For help getting started with Flutter development, view the
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+For live stream
 
+#### videoPlaybackWidget()
+
+For video playback
+
+## Available Function
+
+#### addCamera(String wifiSsid, String wifiPassword)
+
+#### cameraLogin(String cameraId)
+
+#### setDeviceAlarmCallback(String callbackUrl)
+
+#### setHumanDetection(bool isEnabled)
+
+#### startStreaming()
+
+#### stopStreaming()
+
+#### startAudio()
+
+#### stopAudio()
+
+#### startSingleInterCom()
+
+#### stopSingleInterCom()
+
+#### startDualInterCom()
+
+#### stopDualInterCom()
+
+#### captureImageAndSaveLocal()
+
+#### startVideRecordAndSaveLocal()
+
+#### stopVideRecordAndSaveLocal()
+
+#### cameraMovement(double x, double y)
+
+#### imageListInCamera()
+
+#### imageDownloadFromCamera(int position)
+
+#### playbackList()
+
+#### playFromPosition(int position)
+
+#### downloadFromPosition(int position)
+
+#### pausePlayBack()
+
+#### rePlayPlayBack()
+
+#### skipPlayBack(int hour, int minute, int sec)
+
+#### openAudioPlayBack()
+
+#### closeAudioPlayBack()
+
+### #captureImageFromPlayBack()
