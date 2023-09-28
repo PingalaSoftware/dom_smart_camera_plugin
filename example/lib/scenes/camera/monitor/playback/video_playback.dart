@@ -41,6 +41,10 @@ class _VideoPlaybackState extends State<VideoPlayback> {
           SnackBar(content: Text(result['message'])),
         );
       }
+      setState(() {
+        dataList = [];
+        isLoading = false;
+      });
       return;
     }
 
@@ -55,6 +59,11 @@ class _VideoPlaybackState extends State<VideoPlayback> {
         isLoading = false;
         startTime = dataList[0][0];
         endTime = dataList[stringList.length - 1][1];
+      });
+    } else {
+      setState(() {
+        dataList = [];
+        isLoading = false;
       });
     }
   }

@@ -254,28 +254,36 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Future<Map<String, dynamic>> imageListInCamera() async {
-    if (initializedCamera.isEmpty) {
-      return {"isError": true, "message": "Invalid camera operation!"};
+    try {
+      if (initializedCamera.isEmpty) {
+        return {"isError": true, "message": "Invalid camera operation!"};
+      }
+
+      List dataList = await methodChannel
+          .invokeMethod('IMAGE_LIST', {"cameraId": initializedCamera});
+
+      String arrayString = dataList[0];
+      List<String> elements = arrayString.split('H264_DVR_FILE_DATA ');
+      elements.removeAt(0);
+
+      List<String> result = [];
+      for (String element in elements) {
+        int startIndex =
+            element.indexOf("st_2_fileName=") + "st_2_fileName=".length;
+        int endIndex = element.indexOf(", st_3_beginTime=");
+
+        result.add(
+            (element.substring(startIndex, endIndex)).replaceAll('/', '_'));
+      }
+
+      return {"isError": false, "dataList": result};
+    } catch (e) {
+      if (e is PlatformException) {
+        return {"isError": true, "message": e.message};
+      }
+
+      return {"isError": true, "message": "Error: $e"};
     }
-
-    List dataList = await methodChannel
-        .invokeMethod('IMAGE_LIST', {"cameraId": initializedCamera});
-
-    String arrayString = dataList[0];
-    List<String> elements = arrayString.split('H264_DVR_FILE_DATA ');
-    elements.removeAt(0);
-
-    List<String> result = [];
-    for (String element in elements) {
-      int startIndex =
-          element.indexOf("st_2_fileName=") + "st_2_fileName=".length;
-      int endIndex = element.indexOf(", st_3_beginTime=");
-
-      result
-          .add((element.substring(startIndex, endIndex)).replaceAll('/', '_'));
-    }
-
-    return {"isError": false, "dataList": result};
   }
 
   @override

@@ -2,7 +2,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ApiService {
-  final String baseURL = "https://camera.dom4u.in/api/v1";
+  // final String baseURL = "https://camera.dom4u.in/api/v1";
+  final String baseURL = "http://3.130.243.102:8000/api/v1";
 
   Future<Map<String, dynamic>> fetchMasterAccount() async {
     try {

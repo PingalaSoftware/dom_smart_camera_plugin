@@ -36,6 +36,11 @@ class _PictureListState extends State<PictureList> {
           SnackBar(content: Text(result['message'])),
         );
       }
+
+      setState(() {
+        dataList = [];
+        isLoading = false;
+      });
       return;
     }
 
@@ -49,6 +54,11 @@ class _PictureListState extends State<PictureList> {
 
       setState(() {
         dataList = tempData;
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        dataList = [];
         isLoading = false;
       });
     }
@@ -112,7 +122,7 @@ class _PictureListState extends State<PictureList> {
             isLoading
                 ? const CircularProgressIndicator()
                 : dataList.isEmpty
-                    ? const Text("No Playbacks Found")
+                    ? const Text("No Images Found")
                     : playBackListWidget(),
           ],
         ),
