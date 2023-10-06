@@ -272,7 +272,7 @@ public class DomCameraPlugin implements FlutterPlugin, MethodCallHandler {
 
             @Override
             public void onFailed(String errorId, String message) {
-              result.error(errorId, "Failed to get list", "" + message);
+              result.error(errorId, message, "Failed to get list");
             }
           }
         );

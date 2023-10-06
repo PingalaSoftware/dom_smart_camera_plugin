@@ -24,6 +24,7 @@ import java.util.Calendar;
 import java.util.List;
 
 public class PlayBackClass {
+
   String deviceID;
   ViewGroup viewGroup;
   DeviceManager deviceManager = DeviceManager.getInstance();
@@ -99,16 +100,16 @@ public class PlayBackClass {
             if (data instanceof H264_DVR_FILE_DATA[]) {
               dataList = ((DevRecordManager) recordManager).getFileDataList();
             }
-          }
 
-          List<String> timeList = new ArrayList<>();
+            List<String> timeList = new ArrayList<>();
 
-          for (H264_DVR_FILE_DATA fileData : dataList) {
-            String getStartTimeOfYear = fileData.getStartTimeOfYear();
-            String getEndTimeOfYear = fileData.getEndTimeOfYear();
-            timeList.add("" + getStartTimeOfYear + "__" + getEndTimeOfYear);
+            for (H264_DVR_FILE_DATA fileData : dataList) {
+              String getStartTimeOfYear = fileData.getStartTimeOfYear();
+              String getEndTimeOfYear = fileData.getEndTimeOfYear();
+              timeList.add("" + getStartTimeOfYear + "__" + getEndTimeOfYear);
+            }
+            result.onSuccess(timeList);
           }
-          result.onSuccess(timeList);
         }
 
         @Override
@@ -120,8 +121,11 @@ public class PlayBackClass {
           int msgId,
           int errorId
         ) {
-          result.onFailed("" + errorId, "Failed to get list from device!");
-        }
+          if (msgId == 5101) {
+            result.onFailed("0" + errorId, "No Storage Found");
+          } else {
+            result.onFailed("" + errorId, "Failed to get list from device!");
+          }
 
         @Override
         public void onShowRateAndTime(

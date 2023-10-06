@@ -95,7 +95,7 @@ class ApiService {
       if (response.statusCode == 200) {
         final details = json.decode(response.body);
 
-        if (details.isError) {
+        if (details["isError"]) {
           return {'isError': true, 'message': details["message"]};
         } else {
           return {'isError': false};
