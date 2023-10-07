@@ -126,6 +126,7 @@ public class PlayBackClass {
           } else {
             result.onFailed("" + errorId, "Failed to get list from device!");
           }
+        }
 
         @Override
         public void onShowRateAndTime(

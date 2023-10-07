@@ -3,6 +3,8 @@ package com.dom.camera.dom_camera;
 import android.content.Context;
 import android.os.Environment;
 import android.view.ViewGroup;
+
+import com.lib.MsgContent;
 import com.lib.sdk.bean.HandleConfigData;
 import com.lib.sdk.bean.HumanDetectionBean;
 import com.lib.sdk.bean.JsonConfig;
@@ -11,6 +13,8 @@ import com.lib.sdk.struct.H264_DVR_FILE_DATA;
 import com.manager.device.DeviceManager;
 import com.manager.device.config.DevConfigInfo;
 import com.manager.device.config.DevConfigManager;
+import com.manager.device.media.MediaManager;
+import com.manager.device.media.attribute.PlayerAttribute;
 import com.manager.device.media.audio.OnAudioDecibelListener;
 import com.manager.device.media.monitor.MonitorManager;
 import com.utils.FileUtils;
@@ -138,17 +142,39 @@ public class DeviceClass {
     devConfigManager.setDevConfig(devConfigInfo);
   }
 
-  static void liveStream(Context context, String cameraId, ViewGroup view) {
+  static void liveStream(Context context, String cameraId, ViewGroup view, myDomResultInterface resultCb) {
+    System.out.println("Live stream Started");
     monitorManager =
-      DeviceManager.getInstance().createMonitorPlayer(view, cameraId);
+            DeviceManager.getInstance().createMonitorPlayer(view, cameraId);
     monitorManager.startMonitor();
     monitorManager.setChnId(1);
     monitorManager.setOnAudioDecibelListener(
-      new OnAudioDecibelListener() {
-        @Override
-        public void onVolume(double v) {}
-      }
+            new OnAudioDecibelListener() {
+              @Override
+              public void onVolume(double v) {}
+            }
     );
+    monitorManager.setOnMediaManagerListener(new MediaManager.OnMediaManagerListener() {
+      @Override
+      public void onMediaPlayState(PlayerAttribute attribute, int state) {
+
+      }
+
+      @Override
+      public void onFailed(PlayerAttribute attribute, int msgId, int errorId) {
+        resultCb.onFailed("0", "0");
+      }
+
+      @Override
+      public void onShowRateAndTime(PlayerAttribute attribute, boolean isShowTime, String time, String rate) {
+
+      }
+
+      @Override
+      public void onVideoBufferEnd(PlayerAttribute attribute, MsgContent ex) {
+        resultCb.onSuccess(new ArrayList<>());
+      }
+    });
   }
 
   public static void capture(Context context) {
