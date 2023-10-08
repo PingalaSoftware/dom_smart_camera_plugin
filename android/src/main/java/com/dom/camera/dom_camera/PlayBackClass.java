@@ -30,6 +30,9 @@ public class PlayBackClass {
   DeviceManager deviceManager = DeviceManager.getInstance();
   static RecordManager recordManager;
   static List<H264_DVR_FILE_DATA> dataList;
+  static String date;
+  static String month;
+  static String year;
 
   public static void downloadVideoFile(
     int position,
@@ -90,10 +93,13 @@ public class PlayBackClass {
   ) {
     this.deviceID = deviceID;
     this.viewGroup = viewGroup;
+    this.date = date;
+    this.month = month;
+    this.year = year;
     recordManager =
       deviceManager.createRecordPlayer(viewGroup, deviceID, PLAY_DEV_PLAYBACK);
     recordManager.setChnId(0);
-    searchRecordByFile(date,month,year);
+    searchRecordByFile();
     new XMRecyclerView(viewGroup.getContext(), null);
     recordManager.setOnMediaManagerListener(
       new MediaManager.OnRecordManagerListener() {
@@ -149,6 +155,9 @@ public class PlayBackClass {
 
   public static void seekToTime(int times) {
     Calendar searchTime = Calendar.getInstance();
+    searchTime.set(Calendar.DAY_OF_MONTH, Integer.valueOf(date));
+    searchTime.set(Calendar.MONTH, Integer.valueOf(month) - 1);
+    searchTime.set(Calendar.YEAR, Integer.valueOf(year));
     searchTime.set(Calendar.HOUR_OF_DAY, 0);
     searchTime.set(Calendar.MINUTE, 0);
     searchTime.set(Calendar.SECOND, 0);
@@ -209,6 +218,9 @@ public class PlayBackClass {
     );
     Calendar endCalendar;
     endCalendar = Calendar.getInstance();
+    endCalendar.set(Calendar.DAY_OF_MONTH, Integer.valueOf(date));
+    endCalendar.set(Calendar.MONTH, Integer.valueOf(month) - 1);
+    endCalendar.set(Calendar.YEAR, Integer.valueOf(year));
     endCalendar.setTime(playCalendar.getTime());
     endCalendar.set(Calendar.HOUR_OF_DAY, 23);
     endCalendar.set(Calendar.MINUTE, 59);
@@ -216,27 +228,25 @@ public class PlayBackClass {
     recordManager.startPlay(playCalendar, endCalendar);
   }
 
-  public void searchRecordByFile(String date, String month, String year) {
+  public void searchRecordByFile() {
     if (recordManager instanceof DevRecordManager) {
-
       Calendar searchTime = Calendar.getInstance();
-      searchTime.set(Calendar.DAY_OF_MONTH,Integer.valueOf(date));
-      searchTime.set(Calendar.MONTH,Integer.valueOf(month));
-      searchTime.set(Calendar.YEAR,Integer.valueOf(year));
+      searchTime.set(Calendar.DAY_OF_MONTH, Integer.valueOf(date));
+      searchTime.set(Calendar.MONTH, Integer.valueOf(month) - 1);
+      searchTime.set(Calendar.YEAR, Integer.valueOf(year));
       searchTime.set(Calendar.HOUR_OF_DAY, 0);
       searchTime.set(Calendar.MINUTE, 0);
       searchTime.set(Calendar.SECOND, 0);
 
       Calendar endTime = Calendar.getInstance();
-      searchTime.set(Calendar.DAY_OF_MONTH,Integer.valueOf(date));
-      searchTime.set(Calendar.MONTH,Integer.valueOf(month) - 1);
-      searchTime.set(Calendar.YEAR,Integer.valueOf(year));
+      endTime.set(Calendar.DAY_OF_MONTH, Integer.valueOf(date));
+      endTime.set(Calendar.MONTH, Integer.valueOf(month) - 1);
+      endTime.set(Calendar.YEAR, Integer.valueOf(year));
       endTime.set(Calendar.HOUR_OF_DAY, 23);
       endTime.set(Calendar.MINUTE, 59);
       endTime.set(Calendar.SECOND, 59);
 
       ((DevRecordManager) recordManager).searchFileByTime(searchTime, endTime);
-
     }
   }
 }

@@ -2,6 +2,7 @@ import 'package:dom_camera/dom_camera.dart';
 import 'package:dom_camera_example/scenes/camera/monitor/options/playback_time_widget.dart';
 import 'package:dom_camera_example/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class VideoPlayback extends StatefulWidget {
   final String cameraId;
@@ -14,6 +15,7 @@ class VideoPlayback extends StatefulWidget {
 
 class _VideoPlaybackState extends State<VideoPlayback> {
   final _domCameraPlugin = DomCamera();
+  DateTime selectedDate = DateTime.now();
 
   late String cameraId;
   List<List<String>> dataList = [];
@@ -29,11 +31,15 @@ class _VideoPlaybackState extends State<VideoPlayback> {
 
     cameraId = widget.cameraId;
 
-    getPlayBackList();
+    String formattedDate = DateFormat('dd').format(selectedDate);
+    String formattedMonth = DateFormat('MM').format(selectedDate);
+    String formattedYear = DateFormat('yyyy').format(selectedDate);
+
+    getPlayBackList(formattedDate, formattedMonth, formattedYear);
   }
 
-  getPlayBackList() async {
-    final result = await _domCameraPlugin.playbackList("30","9","2023");
+  getPlayBackList(String date, String month, String year) async {
+    final result = await _domCameraPlugin.playbackList(date, month, year);
 
     if (result["isError"]) {
       if (context.mounted) {
@@ -65,6 +71,26 @@ class _VideoPlaybackState extends State<VideoPlayback> {
         dataList = [];
         isLoading = false;
       });
+    }
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+      });
+
+      String formattedDate = DateFormat('dd').format(picked);
+      String formattedMonth = DateFormat('MM').format(picked);
+      String formattedYear = DateFormat('yyyy').format(picked);
+
+      getPlayBackList(formattedDate, formattedMonth, formattedYear);
     }
   }
 
@@ -136,6 +162,8 @@ class _VideoPlaybackState extends State<VideoPlayback> {
 
   @override
   Widget build(BuildContext context) {
+    String formattedDate = DateFormat('dd-MM-yyyy').format(selectedDate);
+
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Playback: $cameraId',
@@ -213,6 +241,27 @@ class _VideoPlaybackState extends State<VideoPlayback> {
                   const Expanded(child: PlaybackTimeWidget())
                 ],
               ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Text(
+                  formattedDate,
+                  style: const TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                InkWell(
+                  onTap: () => _selectDate(context),
+                  child: const Icon(
+                    Icons.calendar_today,
+                    size: 30.0,
+                    color: Colors.blue,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 10),
             const Text("List"),

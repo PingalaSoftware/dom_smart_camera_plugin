@@ -48,7 +48,7 @@ class DomCamera {
     return DomCameraPlatform.instance.setHumanDetection(isEnabled);
   }
 
-  Future<Map<String, dynamic>>  startStreaming() {
+  Future<Map<String, dynamic>> startStreaming() {
     return DomCameraPlatform.instance.cameraStream(true);
   }
 
@@ -104,8 +104,9 @@ class DomCamera {
     return DomCameraPlatform.instance.imageDownloadFromCamera(position);
   }
 
-  Future<Map<String, dynamic>> playbackList(String date, String month, String year) {
-    return DomCameraPlatform.instance.playbackList(date,month,year);
+  Future<Map<String, dynamic>> playbackList(
+      String date, String month, String year) {
+    return DomCameraPlatform.instance.playbackList(date, month, year);
   }
 
   Map<String, dynamic> playFromPosition(int position) {

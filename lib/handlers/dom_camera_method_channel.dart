@@ -141,7 +141,7 @@ class MethodChannelDomCamera extends DomCameraPlatform {
   }
 
   @override
-  Future<Map<String, dynamic>> cameraStream(bool isShowStream) async{
+  Future<Map<String, dynamic>> cameraStream(bool isShowStream) async {
     try {
       if (initializedCamera.isEmpty) {
         return {"isError": true, "message": "Please Login to Camera!"};
@@ -161,8 +161,6 @@ class MethodChannelDomCamera extends DomCameraPlatform {
           "message": isShowStream ? "Started Streaming!" : "Stopped Streaming!"
         };
       }
-
-
     } catch (e) {
       if (e is PlatformException) {
         return {"isError": true, "message": e.message};
@@ -316,14 +314,30 @@ class MethodChannelDomCamera extends DomCameraPlatform {
   }
 
   @override
-  Future<Map<String, dynamic>> playbackList(String date, String month, String year) async {
+  Future<Map<String, dynamic>> playbackList(
+      String date, String month, String year) async {
     try {
+      DateTime currentDate = DateTime.now();
+      DateTime pickedDate =
+          DateTime(int.parse(year), int.parse(month), int.parse(date));
+
+      if (pickedDate.isAfter(currentDate)) {
+        return {
+          "isError": true,
+          "message": "Date selected must be less than or equal to today"
+        };
+      }
+
       if (initializedCamera.isEmpty) {
         return {"isError": true, "message": "Invalid camera operation!"};
       }
 
-      List dataList = await methodChannel
-          .invokeMethod('PLAYBACK_LIST', {"cameraId": initializedCamera, "date": date, "month": month, "year": year});
+      List dataList = await methodChannel.invokeMethod('PLAYBACK_LIST', {
+        "cameraId": initializedCamera,
+        "date": date,
+        "month": month,
+        "year": year
+      });
 
       return {"isError": false, "dataList": dataList};
     } catch (e) {
