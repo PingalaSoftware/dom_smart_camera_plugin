@@ -316,14 +316,14 @@ class MethodChannelDomCamera extends DomCameraPlatform {
   }
 
   @override
-  Future<Map<String, dynamic>> playbackList() async {
+  Future<Map<String, dynamic>> playbackList(String date, String month, String year) async {
     try {
       if (initializedCamera.isEmpty) {
         return {"isError": true, "message": "Invalid camera operation!"};
       }
 
       List dataList = await methodChannel
-          .invokeMethod('PLAYBACK_LIST', {"cameraId": initializedCamera});
+          .invokeMethod('PLAYBACK_LIST', {"cameraId": initializedCamera, "date": date, "month": month, "year": year});
 
       return {"isError": false, "dataList": dataList};
     } catch (e) {

@@ -104,8 +104,8 @@ class DomCamera {
     return DomCameraPlatform.instance.imageDownloadFromCamera(position);
   }
 
-  Future<Map<String, dynamic>> playbackList() {
-    return DomCameraPlatform.instance.playbackList();
+  Future<Map<String, dynamic>> playbackList(String date, String month, String year) {
+    return DomCameraPlatform.instance.playbackList(date,month,year);
   }
 
   Map<String, dynamic> playFromPosition(int position) {

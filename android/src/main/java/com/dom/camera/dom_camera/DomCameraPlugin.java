@@ -278,9 +278,15 @@ public class DomCameraPlugin implements FlutterPlugin, MethodCallHandler {
         break;
       case PLAYBACK_LIST:
         cameraId = call.argument("cameraId");
+        String date = call.argument("date");
+        String month = call.argument("month");
+        String year = call.argument("year");
         new PlayBackClass(
           cameraId,
           playBackView,
+          date,
+          month,
+          year,
           new DeviceClass.myDomResultInterface() {
             public void onSuccess(List<String> dataList) {
               result.success(dataList);

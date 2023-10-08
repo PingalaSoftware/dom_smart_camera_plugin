@@ -69,8 +69,8 @@ abstract class DomCameraPlatform extends PlatformInterface {
         'ImageDownloadFromCamera() has not been implemented.');
   }
 
-  Future<Map<String, dynamic>> playbackList() {
-    throw UnimplementedError('playbackList() has not been implemented.');
+  Future<Map<String, dynamic>> playbackList(String date, String month, String year) {
+    throw UnimplementedError('playbackList(String date, String month, String year) has not been implemented.');
   }
 
   Map<String, dynamic> playFromPosition(int position) {
