@@ -142,7 +142,11 @@ public class DeviceClass {
     devConfigManager.setDevConfig(devConfigInfo);
   }
 
-  static void liveStream(Context context, String cameraId, ViewGroup view, myDomResultInterface resultCb) {
+  static void liveStream(
+          Context context,
+          String cameraId,
+          ViewGroup view,
+          myDomResultInterface resultCb) {
     System.out.println("Live stream Started");
     monitorManager =
             DeviceManager.getInstance().createMonitorPlayer(view, cameraId);
