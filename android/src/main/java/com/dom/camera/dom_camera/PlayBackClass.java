@@ -100,7 +100,6 @@ public class PlayBackClass {
             if (data instanceof H264_DVR_FILE_DATA[]) {
               dataList = ((DevRecordManager) recordManager).getFileDataList();
             }
-
             List<String> timeList = new ArrayList<>();
 
             for (H264_DVR_FILE_DATA fileData : dataList) {
@@ -126,6 +125,7 @@ public class PlayBackClass {
           } else {
             result.onFailed("" + errorId, "Failed to get list from device!");
           }
+        }
 
         @Override
         public void onShowRateAndTime(
@@ -220,7 +220,6 @@ public class PlayBackClass {
       searchTime.set(Calendar.MINUTE, 0);
       searchTime.set(Calendar.SECOND, 0);
       Calendar endTime = Calendar.getInstance();
-      endTime.set(2023, 9, 6);
       endTime.set(Calendar.HOUR_OF_DAY, 23);
       endTime.set(Calendar.MINUTE, 59);
       endTime.set(Calendar.SECOND, 59);
