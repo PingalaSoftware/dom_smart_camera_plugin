@@ -48,11 +48,11 @@ class DomCamera {
     return DomCameraPlatform.instance.setHumanDetection(isEnabled);
   }
 
-  Map<String, dynamic> startStreaming() {
+  Future<Map<String, dynamic>>  startStreaming() {
     return DomCameraPlatform.instance.cameraStream(true);
   }
 
-  Map<String, dynamic> stopStreaming() {
+  Future<Map<String, dynamic>> stopStreaming() {
     return DomCameraPlatform.instance.cameraStream(false);
   }
 

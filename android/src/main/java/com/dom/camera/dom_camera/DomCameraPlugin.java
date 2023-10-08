@@ -172,7 +172,23 @@ public class DomCameraPlugin implements FlutterPlugin, MethodCallHandler {
         DeviceClass.liveStream(
           this.applicationContext,
           cameraId,
-          this.viewCameraActivity
+          this.viewCameraActivity,
+                new DeviceClass.myDomResultInterface(){
+
+                  @Override
+                  public void onSuccess(List<String> dataList) {
+                    result.success(dataList);
+                  }
+
+                  @Override
+                  public void onFailed(String errorId, String message) {
+                    result.error(
+                            errorId,
+                            "Please check the device connection",
+                            "" + message
+                    );
+                  }
+                }
         );
         break;
       case SET_HUMAN_DETECTION:

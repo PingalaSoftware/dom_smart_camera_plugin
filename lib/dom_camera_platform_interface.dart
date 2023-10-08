@@ -34,7 +34,7 @@ abstract class DomCameraPlatform extends PlatformInterface {
     throw UnimplementedError('setHumanDetection() has not been implemented.');
   }
 
-  Map<String, dynamic> cameraStream(bool isShowStream) {
+  Future<Map<String, dynamic>> cameraStream(bool isShowStream) {
     throw UnimplementedError('cameraStream() has not been implemented.');
   }
 

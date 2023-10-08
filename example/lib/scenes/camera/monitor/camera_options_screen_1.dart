@@ -21,7 +21,9 @@ class _CameraOptionScreen1State extends State<CameraOptionScreen1> {
 
   late String cameraId;
   bool _isLiveView = false;
+  bool _isLoading = false;
   late VoidCallback onStreamError;
+
 
   @override
   void initState() {
@@ -35,8 +37,14 @@ class _CameraOptionScreen1State extends State<CameraOptionScreen1> {
     });
   }
 
-  void _startLiveView() {
-    final data = _domCameraPlugin.startStreaming();
+  void _startLiveView() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final data = await _domCameraPlugin.startStreaming();
+
+
     if (data["isError"]) {
       onStreamError();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -44,6 +52,10 @@ class _CameraOptionScreen1State extends State<CameraOptionScreen1> {
       );
       return;
     }
+
+    setState(() {
+      _isLoading = false;
+    });
 
     setState(() {
       _isLiveView = true;
@@ -73,7 +85,10 @@ class _CameraOptionScreen1State extends State<CameraOptionScreen1> {
               padding: const EdgeInsets.only(left: 4.0),
               child: GestureDetector(
                 onTap: _isLiveView ? _stopLiveView : _startLiveView,
-                child: OptionsButton(
+                child:
+                _isLoading?
+                const SizedBox(height: 50, width: 80,child: CircularProgressIndicator(color: Colors.red,)):
+                OptionsButton(
                   text: _isLiveView ? "STOP LIVE STREAM" : "SHOW LIVE STREAM",
                   size: 50,
                   textColor: Colors.white,

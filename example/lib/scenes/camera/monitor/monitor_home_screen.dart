@@ -53,7 +53,7 @@ class _MonitorHomeScreenState extends State<MonitorHomeScreen> {
     _localStorage.put('usedCameraIds', cameraIds);
 
     setState(() {
-      usedCameraIds = cameraIds;
+      //usedCameraIds = cameraIds;
     });
   }
 

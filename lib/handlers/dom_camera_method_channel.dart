@@ -141,22 +141,35 @@ class MethodChannelDomCamera extends DomCameraPlatform {
   }
 
   @override
-  Map<String, dynamic> cameraStream(bool isShowStream) {
-    if (initializedCamera.isEmpty) {
-      return {"isError": true, "message": "Please Login to Camera!"};
-    }
+  Future<Map<String, dynamic>> cameraStream(bool isShowStream) async{
+    try {
+      if (initializedCamera.isEmpty) {
+        return {"isError": true, "message": "Please Login to Camera!"};
+      }
 
-    if (isShowStream) {
-      methodChannel
-          .invokeMethod('LIVE_STREAM', {"cameraId": initializedCamera});
-    } else {
-      methodChannel.invokeMethod('STOP_STREAM');
-    }
+      if (isShowStream) {
+        await methodChannel
+            .invokeMethod('LIVE_STREAM', {"cameraId": initializedCamera});
+        return {
+          "isError": false,
+          "message": isShowStream ? "Started Streaming!" : "Stopped Streaming!"
+        };
+      } else {
+        methodChannel.invokeMethod('STOP_STREAM');
+        return {
+          "isError": false,
+          "message": isShowStream ? "Started Streaming!" : "Stopped Streaming!"
+        };
+      }
 
-    return {
-      "isError": false,
-      "message": isShowStream ? "Started Streaming!" : "Stopped Streaming!"
-    };
+
+    } catch (e) {
+      if (e is PlatformException) {
+        return {"isError": true, "message": e.message};
+      }
+
+      return {"isError": true, "message": "Error: $e"};
+    }
   }
 
   @override
