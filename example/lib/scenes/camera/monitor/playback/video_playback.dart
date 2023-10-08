@@ -33,7 +33,7 @@ class _VideoPlaybackState extends State<VideoPlayback> {
   }
 
   getPlayBackList() async {
-    final result = await _domCameraPlugin.playbackList();
+    final result = await _domCameraPlugin.playbackList("30","9","2023");
 
     if (result["isError"]) {
       if (context.mounted) {

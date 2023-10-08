@@ -83,6 +83,9 @@ public class PlayBackClass {
   public PlayBackClass(
     String deviceID,
     ViewGroup viewGroup,
+    String date,
+    String month,
+    String year,
     DeviceClass.myDomResultInterface result
   ) {
     this.deviceID = deviceID;
@@ -90,7 +93,7 @@ public class PlayBackClass {
     recordManager =
       deviceManager.createRecordPlayer(viewGroup, deviceID, PLAY_DEV_PLAYBACK);
     recordManager.setChnId(0);
-    searchRecordByFile();
+    searchRecordByFile(date,month,year);
     new XMRecyclerView(viewGroup.getContext(), null);
     recordManager.setOnMediaManagerListener(
       new MediaManager.OnRecordManagerListener() {
@@ -121,7 +124,7 @@ public class PlayBackClass {
           int errorId
         ) {
           if (msgId == 5101) {
-            result.onFailed("0" + errorId, "No Storage Found");
+            result.onFailed("0" + errorId, "No Data Found");
           } else {
             result.onFailed("" + errorId, "Failed to get list from device!");
           }
@@ -213,17 +216,27 @@ public class PlayBackClass {
     recordManager.startPlay(playCalendar, endCalendar);
   }
 
-  public void searchRecordByFile() {
+  public void searchRecordByFile(String date, String month, String year) {
     if (recordManager instanceof DevRecordManager) {
+
       Calendar searchTime = Calendar.getInstance();
+      searchTime.set(Calendar.DAY_OF_MONTH,Integer.valueOf(date));
+      searchTime.set(Calendar.MONTH,Integer.valueOf(month));
+      searchTime.set(Calendar.YEAR,Integer.valueOf(year));
       searchTime.set(Calendar.HOUR_OF_DAY, 0);
       searchTime.set(Calendar.MINUTE, 0);
       searchTime.set(Calendar.SECOND, 0);
+
       Calendar endTime = Calendar.getInstance();
+      searchTime.set(Calendar.DAY_OF_MONTH,Integer.valueOf(date));
+      searchTime.set(Calendar.MONTH,Integer.valueOf(month) - 1);
+      searchTime.set(Calendar.YEAR,Integer.valueOf(year));
       endTime.set(Calendar.HOUR_OF_DAY, 23);
       endTime.set(Calendar.MINUTE, 59);
       endTime.set(Calendar.SECOND, 59);
+
       ((DevRecordManager) recordManager).searchFileByTime(searchTime, endTime);
+
     }
   }
 }
