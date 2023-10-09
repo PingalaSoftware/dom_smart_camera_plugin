@@ -433,21 +433,21 @@ class MethodChannelDomCamera extends DomCameraPlatform {
     double degrees = angle * (180 / pi);
 
     if (degrees >= -22.5 && degrees < 22.5) {
-      sendPTZControlCmd(PTZConstants.panRight, false, initializedCamera);
+      sendPTZControlCmd(PTZConstants.panLeft, false, initializedCamera);
     } else if (degrees >= 22.5 && degrees < 67.5) {
-      sendPTZControlCmd(PTZConstants.panRightDown, false, initializedCamera);
+      sendPTZControlCmd(PTZConstants.panLeftDown, false, initializedCamera);
     } else if (degrees >= 67.5 && degrees < 112.5) {
       sendPTZControlCmd(PTZConstants.tiltDown, false, initializedCamera);
     } else if (degrees >= 112.5 && degrees < 157.5) {
-      sendPTZControlCmd(PTZConstants.panLeftDown, false, initializedCamera);
+      sendPTZControlCmd(PTZConstants.panRightDown, false, initializedCamera);
     } else if (degrees >= 157.5 || degrees < -157.5) {
-      sendPTZControlCmd(PTZConstants.panLeft, false, initializedCamera);
+      sendPTZControlCmd(PTZConstants.panRight, false, initializedCamera);
     } else if (degrees >= -157.5 && degrees < -112.5) {
-      sendPTZControlCmd(PTZConstants.panLeftTop, false, initializedCamera);
+      sendPTZControlCmd(PTZConstants.panRightTop, false, initializedCamera);
     } else if (degrees >= -112.5 && degrees < -67.5) {
       sendPTZControlCmd(PTZConstants.tiltUp, false, initializedCamera);
     } else if (degrees >= -67.5 && degrees < -22.5) {
-      sendPTZControlCmd(PTZConstants.panRightTop, false, initializedCamera);
+      sendPTZControlCmd(PTZConstants.panLeftTop, false, initializedCamera);
     } else {
       sendPTZControlCmd(1, true, initializedCamera);
       return {"isError": false};
