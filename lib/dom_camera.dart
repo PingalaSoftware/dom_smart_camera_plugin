@@ -36,8 +36,10 @@ class DomCamera {
     }
   }
 
-  Future<Map<String, dynamic>> setDeviceAlarmCallback(String callbackUrl) {
-    return DomCameraPlatform.instance.setDeviceAlarmCallback(callbackUrl);
+  Future<Map<String, dynamic>> setDeviceAlarmCallback(String callbackUrl,
+      [String? cameraId]) {
+    return DomCameraPlatform.instance
+        .setDeviceAlarmCallback(callbackUrl, cameraId);
   }
 
   // Future<Map<String, dynamic>> cameraState(String cameraId) {

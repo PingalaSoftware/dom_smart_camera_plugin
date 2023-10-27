@@ -87,14 +87,14 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Future<Map<String, dynamic>> setDeviceAlarmCallback(
-      String callbackUrl) async {
+      String callbackUrl, String? cameraId) async {
     try {
-      if (initializedCamera.isEmpty) {
+      if (initializedCamera.isEmpty && cameraId == null) {
         return {"isError": true, "message": "Please Login to Camera!"};
       }
 
       final apiResponse = await apiService.setDeviceAlarmCallback(
-          initializedCamera, callbackUrl);
+          cameraId ?? initializedCamera, callbackUrl);
       if (apiResponse['isError']) return apiResponse;
 
       return {

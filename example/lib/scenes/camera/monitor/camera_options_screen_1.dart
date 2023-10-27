@@ -24,7 +24,6 @@ class _CameraOptionScreen1State extends State<CameraOptionScreen1> {
   bool _isLoading = false;
   late VoidCallback onStreamError;
 
-
   @override
   void initState() {
     super.initState();
@@ -44,12 +43,13 @@ class _CameraOptionScreen1State extends State<CameraOptionScreen1> {
 
     final data = await _domCameraPlugin.startStreaming();
 
-
     if (data["isError"]) {
       onStreamError();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(data["message"])),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data["message"])),
+        );
+      }
       return;
     }
 
@@ -85,15 +85,22 @@ class _CameraOptionScreen1State extends State<CameraOptionScreen1> {
               padding: const EdgeInsets.only(left: 4.0),
               child: GestureDetector(
                 onTap: _isLiveView ? _stopLiveView : _startLiveView,
-                child:
-                _isLoading?
-                const SizedBox(height: 50, width: 80,child: CircularProgressIndicator(color: Colors.red,)):
-                OptionsButton(
-                  text: _isLiveView ? "STOP LIVE STREAM" : "SHOW LIVE STREAM",
-                  size: 50,
-                  textColor: Colors.white,
-                  backgroundColor: _isLiveView ? Colors.red : Colors.green,
-                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 50,
+                        width: 80,
+                        child: CircularProgressIndicator(
+                          color: Colors.red,
+                        ))
+                    : OptionsButton(
+                        text: _isLiveView
+                            ? "STOP LIVE STREAM"
+                            : "SHOW LIVE STREAM",
+                        size: 50,
+                        textColor: Colors.white,
+                        backgroundColor:
+                            _isLiveView ? Colors.red : Colors.green,
+                      ),
               ),
             ),
           ),

@@ -21,7 +21,8 @@ abstract class DomCameraPlatform extends PlatformInterface {
     throw UnimplementedError('cameraLogin() has not been implemented.');
   }
 
-  Future<Map<String, dynamic>> setDeviceAlarmCallback(String callbackUrl) {
+  Future<Map<String, dynamic>> setDeviceAlarmCallback(
+      String callbackUrl, String? cameraId) {
     throw UnimplementedError(
         'setDeviceAlarmCallback() has not been implemented.');
   }
