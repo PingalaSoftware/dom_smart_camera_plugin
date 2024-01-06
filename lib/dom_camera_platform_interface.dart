@@ -13,6 +13,11 @@ abstract class DomCameraPlatform extends PlatformInterface {
     _instance = instance;
   }
 
+  Future<Map<String, dynamic>> iosNetworkPermission() {
+    throw UnimplementedError(
+        'iosNetworkPermission() has not been implemented.');
+  }
+
   Future<Map<String, dynamic>> addCamera(String wifiSsid, String wifiPassword) {
     throw UnimplementedError('addCamera() has not been implemented.');
   }
@@ -76,7 +81,7 @@ abstract class DomCameraPlatform extends PlatformInterface {
         'playbackList(String date, String month, String year) has not been implemented.');
   }
 
-  Map<String, dynamic> playFromPosition(int position) {
+  Future<Map<String, dynamic>> playFromPosition(int position) {
     throw UnimplementedError('playFromPosition() has not been implemented.');
   }
 

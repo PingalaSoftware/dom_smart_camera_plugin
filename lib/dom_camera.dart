@@ -4,6 +4,10 @@ import 'dom_camera_platform_interface.dart';
 import 'dart:io' show Platform;
 
 class DomCamera {
+  Future<Map<String, dynamic>> iosNetworkPermission() {
+    return DomCameraPlatform.instance.iosNetworkPermission();
+  }
+
   Future<Map<String, dynamic>> addCamera(String wifiSsid, String wifiPassword) {
     return DomCameraPlatform.instance.addCamera(wifiSsid, wifiPassword);
   }
@@ -111,7 +115,7 @@ class DomCamera {
     return DomCameraPlatform.instance.playbackList(date, month, year);
   }
 
-  Map<String, dynamic> playFromPosition(int position) {
+  Future<Map<String, dynamic>> playFromPosition(int position) {
     return DomCameraPlatform.instance.playFromPosition(position);
   }
 

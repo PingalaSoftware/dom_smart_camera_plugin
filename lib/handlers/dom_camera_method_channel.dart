@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -15,6 +16,23 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @visibleForTesting
   final methodChannel = const MethodChannel('dom_camera');
+
+  @override
+  Future<Map<String, dynamic>> iosNetworkPermission() async {
+    if (Platform.isIOS) {
+      List result = await methodChannel.invokeMethod('WIFI_PERMISSION');
+
+      return {
+        "isError": false,
+        "result": result[0] == 0 ? false : true,
+      };
+    } else {
+      return {
+        "isError": false,
+        "result": true,
+      };
+    }
+  }
 
   @override
   Future<Map<String, dynamic>> addCamera(
@@ -350,13 +368,14 @@ class MethodChannelDomCamera extends DomCameraPlatform {
   }
 
   @override
-  Map<String, dynamic> playFromPosition(position) {
+  Future<Map<String, dynamic>> playFromPosition(position) async {
     isPlaybackStarted = true;
     if (initializedCamera.isEmpty) {
       return {"isError": true, "message": "Invalid camera operation!"};
     }
 
-    methodChannel.invokeMethod('PLAY_FROM_POSITION', {"position": position});
+    await methodChannel
+        .invokeMethod('PLAY_FROM_POSITION', {"position": position});
 
     return {"isError": false};
   }

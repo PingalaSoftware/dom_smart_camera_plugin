@@ -100,8 +100,8 @@ class _VideoPlaybackState extends State<VideoPlayback> {
     return endDateTime.difference(startDateTime);
   }
 
-  void onItemClick(List<String> item, int index) {
-    final result = _domCameraPlugin.playFromPosition(index);
+  void onItemClick(List<String> item, int index) async {
+    final result = await _domCameraPlugin.playFromPosition(index);
 
     if (result["isError"]) {
       if (context.mounted) {

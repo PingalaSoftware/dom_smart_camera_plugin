@@ -301,7 +301,23 @@ public class DomCameraPlugin implements FlutterPlugin, MethodCallHandler {
         break;
       case PLAY_FROM_POSITION:
         position = call.argument("position");
-        PlayBackClass.startPlayRecord(position);
+        PlayBackClass.startPlayRecord(position,
+                new DeviceClass.myDomResultInterface(){
+
+                  @Override
+                  public void onSuccess(List<String> dataList) {
+                    result.success(dataList);
+                  }
+
+                  @Override
+                  public void onFailed(String errorId, String message) {
+                    result.error(
+                            errorId,
+                            "Please check the device connection",
+                            "" + message
+                    );
+                  }
+                });
         break;
       case DOWNLOAD_FROM_POSITION:
         position = call.argument("position");

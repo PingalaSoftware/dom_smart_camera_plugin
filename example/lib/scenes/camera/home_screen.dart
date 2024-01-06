@@ -7,6 +7,7 @@ import 'package:hive/hive.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:dom_camera/dom_camera.dart';
+import 'dart:io' show Platform;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,6 +19,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _domCameraPlugin = DomCamera();
   bool isCameraInitializing = false;
+  bool showLive = true;
+
+  bool isIOSNetworkPermissionEnabled = false;
 
   final _localStorage = Hive.box('dom_camera_storage');
 
@@ -56,7 +60,20 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final permissionValue = await Permission.location.status;
-    if (permissionValue == PermissionStatus.denied) {
+    if (permissionValue == PermissionStatus.denied &&
+        !isIOSNetworkPermissionEnabled) {
+      if (Platform.isIOS) {
+        final data = await _domCameraPlugin.iosNetworkPermission();
+        if (data["result"]) {
+          setState(() {
+            isIOSNetworkPermissionEnabled = true;
+          });
+          return;
+        }
+        setState(() {
+          isIOSNetworkPermissionEnabled = false;
+        });
+      }
       locationAlertDialog(localContext);
       return;
     }

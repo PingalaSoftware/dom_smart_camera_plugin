@@ -33,6 +33,8 @@ public class PlayBackClass {
   static String date;
   static String month;
   static String year;
+  static boolean isStartPlaybackCalled = false;
+  static DeviceClass.myDomResultInterface resultCallback;
 
   public static void downloadVideoFile(
     int position,
@@ -145,10 +147,12 @@ public class PlayBackClass {
         ) {}
 
         @Override
-        public void onVideoBufferEnd(
-          PlayerAttribute attribute,
-          MsgContent ex
-        ) {}
+        public void onVideoBufferEnd(PlayerAttribute attribute, MsgContent ex) {
+          if (isStartPlaybackCalled) {
+            isStartPlaybackCalled = false;
+            resultCallback.onSuccess(new ArrayList<>());
+          }
+        }
       }
     );
   }
@@ -211,7 +215,10 @@ public class PlayBackClass {
     recordManager.capture(galleryPath);
   }
 
-  public static void startPlayRecord(int position) {
+  public static void startPlayRecord(
+    int position,
+    DeviceClass.myDomResultInterface resultCb
+  ) {
     H264_DVR_FILE_DATA recordInfo = dataList.get(position);
     Calendar playCalendar = TimeUtils.getNormalFormatCalender(
       recordInfo.getStartTimeOfYear()
@@ -225,6 +232,8 @@ public class PlayBackClass {
     endCalendar.set(Calendar.HOUR_OF_DAY, 23);
     endCalendar.set(Calendar.MINUTE, 59);
     endCalendar.set(Calendar.SECOND, 59);
+    isStartPlaybackCalled = true;
+    resultCallback = resultCb;
     recordManager.startPlay(playCalendar, endCalendar);
   }
 
