@@ -1,9 +1,17 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'dom_camera_platform_interface.dart';
 import 'dart:io' show Platform;
 
 class DomCamera {
+  final _timerEventChannel = const EventChannel('dom_camera/playbackListener');
+
+  Stream playbackTimerStreamListener() {
+    return _timerEventChannel.receiveBroadcastStream();
+  }
+
   Future<Map<String, dynamic>> iosNetworkPermission() {
     return DomCameraPlatform.instance.iosNetworkPermission();
   }

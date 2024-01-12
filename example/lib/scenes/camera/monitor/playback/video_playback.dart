@@ -4,7 +4,6 @@ import 'package:dom_camera_example/scenes/camera/monitor/playback/time_range_see
 import 'package:dom_camera_example/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:dom_camera_example/utils/event_bus.dart';
 
 class VideoPlayback extends StatefulWidget {
   final String cameraId;
@@ -21,7 +20,7 @@ class _VideoPlaybackState extends State<VideoPlayback> {
 
   late String cameraId;
   List<List<String>> dataList = [];
-  bool isLoading = true;
+  bool isListLoading = true;
   String startTime = "";
   String endTime = "";
   bool isPlaying = false;
@@ -42,11 +41,6 @@ class _VideoPlaybackState extends State<VideoPlayback> {
     String formattedYear = DateFormat('yyyy').format(selectedDate);
 
     getPlayBackList(formattedDate, formattedMonth, formattedYear);
-
-    eventBus.on<SeekToPositionPlayback>().listen((event) {
-      print("SeekToPositionPlayback $event");
-      // _domCameraPlugin.skipPlayBack(pickedTime.hour, pickedTime.minute, 00)
-    });
   }
 
   getPlayBackList(String date, String month, String year) async {
@@ -60,7 +54,7 @@ class _VideoPlaybackState extends State<VideoPlayback> {
       }
       setState(() {
         dataList = [];
-        isLoading = false;
+        isListLoading = false;
       });
       return;
     }
@@ -73,14 +67,14 @@ class _VideoPlaybackState extends State<VideoPlayback> {
 
       setState(() {
         dataList = stringList;
-        isLoading = false;
+        isListLoading = false;
         startTime = dataList[0][0];
         endTime = dataList[stringList.length - 1][1];
       });
     } else {
       setState(() {
         dataList = [];
-        isLoading = false;
+        isListLoading = false;
       });
     }
   }
@@ -114,6 +108,8 @@ class _VideoPlaybackState extends State<VideoPlayback> {
   void onItemClick(List<String> item, int index) async {
     setState(() {
       isPlaybackLoading = true;
+      startTime = item[0];
+      endTime = item[1];
     });
     final result = await _domCameraPlugin.playFromPosition(index);
     setState(() {
@@ -194,11 +190,10 @@ class _VideoPlaybackState extends State<VideoPlayback> {
                 child: _domCameraPlugin.videoPlaybackWidget(),
               ),
             ),
-            // TimeRangeSeekBar(
-            //   startTime: DateTime.parse("2024-01-11 08:34:23"),
-            //   endTime: DateTime.parse("2024-01-11 10:21:47"),
-            // ),
             const SizedBox(height: 20),
+            const TimeRangeSeekBar(),
+            const SizedBox(height: 10),
+            if (isPlaying) Text("$startTime -- $endTime"),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Row(
@@ -286,11 +281,7 @@ class _VideoPlaybackState extends State<VideoPlayback> {
               ],
             ),
             const SizedBox(height: 10),
-            const Text("List"),
-            isLoading
-                ? const Text("Empty list")
-                : Text("Start Time: $startTime, End Time: $endTime"),
-            isLoading
+            isListLoading
                 ? const CircularProgressIndicator()
                 : dataList.isEmpty
                     ? const Text("No Playbacks Found")

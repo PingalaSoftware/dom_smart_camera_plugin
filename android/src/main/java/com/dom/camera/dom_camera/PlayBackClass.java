@@ -5,6 +5,7 @@ import static com.manager.device.media.MediaManager.PLAY_DEV_PLAYBACK;
 
 import android.os.Environment;
 import android.view.ViewGroup;
+import com.google.gson.Gson;
 import com.lib.FunSDK;
 import com.lib.MsgContent;
 import com.lib.sdk.struct.H264_DVR_FILE_DATA;
@@ -18,10 +19,16 @@ import com.manager.device.media.playback.RecordManager;
 import com.utils.FileUtils;
 import com.utils.TimeUtils;
 import com.xm.ui.widget.XMRecyclerView;
+import io.flutter.plugin.common.EventChannel.EventSink;
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PlayBackClass {
 
@@ -35,6 +42,9 @@ public class PlayBackClass {
   static String year;
   static boolean isStartPlaybackCalled = false;
   static DeviceClass.myDomResultInterface resultCallback;
+  static Calendar playBackEndTime;
+
+  static EventSink eventSink;
 
   public static void downloadVideoFile(
     int position,
@@ -164,9 +174,33 @@ public class PlayBackClass {
           String time,
           String rate
         ) {
-          System.out.println("Time" + time);
-          System.out.println("rate" + rate);
-          System.out.println("isShowTime" + isShowTime);
+          if (eventSink != null) {
+            Map<String, Object> jsonData = new HashMap<>();
+
+            jsonData.put("key", "PLAYBACK_STREAM_DATA");
+            jsonData.put("time", time);
+            jsonData.put("rate", rate);
+            jsonData.put("isShowTime", isShowTime);
+            String jsonString = new Gson().toJson(jsonData);
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat(
+              "yyyy-MM-dd HH:mm:ss"
+            );
+            Date parsedDate;
+            try {
+              parsedDate = dateFormat.parse(time);
+            } catch (ParseException e) {
+              throw new RuntimeException(e);
+            }
+
+            Calendar currentTime = Calendar.getInstance();
+            currentTime.setTime(parsedDate);
+            if (currentTime.after(playBackEndTime)) {
+              recordManager.stopPlay();
+            } else {
+              eventSink.success(jsonString);
+            }
+          }
         }
 
         @Override
@@ -257,24 +291,21 @@ public class PlayBackClass {
 
   public static void startPlayRecord(
     int position,
+    EventSink eventSinkCB,
     DeviceClass.myDomResultInterface resultCb
   ) {
     H264_DVR_FILE_DATA recordInfo = dataList.get(position);
     Calendar playCalendar = TimeUtils.getNormalFormatCalender(
       recordInfo.getStartTimeOfYear()
     );
-    Calendar endCalendar;
-    endCalendar = Calendar.getInstance();
-    endCalendar.set(Calendar.DAY_OF_MONTH, Integer.valueOf(date));
-    endCalendar.set(Calendar.MONTH, Integer.valueOf(month) - 1);
-    endCalendar.set(Calendar.YEAR, Integer.valueOf(year));
-    endCalendar.setTime(playCalendar.getTime());
-    endCalendar.set(Calendar.HOUR_OF_DAY, 23);
-    endCalendar.set(Calendar.MINUTE, 59);
-    endCalendar.set(Calendar.SECOND, 59);
+    Calendar playCalendarEndTime = TimeUtils.getNormalFormatCalender(
+      recordInfo.getEndTimeOfYear()
+    );
     isStartPlaybackCalled = true;
     resultCallback = resultCb;
-    recordManager.startPlay(playCalendar, endCalendar);
+    eventSink = eventSinkCB;
+    playBackEndTime = playCalendarEndTime;
+    recordManager.startPlay(playCalendar, playCalendarEndTime);
   }
 
   public void searchRecordByFile() {

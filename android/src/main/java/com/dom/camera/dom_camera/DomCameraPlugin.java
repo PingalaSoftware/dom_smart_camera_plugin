@@ -16,6 +16,9 @@ import com.manager.account.BaseAccountManager;
 import com.manager.device.DeviceManager;
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.plugin.common.EventChannel;
+import io.flutter.plugin.common.EventChannel.EventSink;
+import io.flutter.plugin.common.EventChannel.StreamHandler;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -23,9 +26,11 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DomCameraPlugin implements FlutterPlugin, MethodCallHandler {
+public class DomCameraPlugin
+  implements FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler {
 
   private MethodChannel channel;
+  private EventChannel eventChannel;
   private Context applicationContext;
 
   String cameraId;
@@ -36,6 +41,7 @@ public class DomCameraPlugin implements FlutterPlugin, MethodCallHandler {
 
   private ViewGroup viewCameraActivity;
   private ViewGroup playBackView;
+  private EventSink eventSink;
 
   @Override
   public void onAttachedToEngine(
@@ -70,14 +76,29 @@ public class DomCameraPlugin implements FlutterPlugin, MethodCallHandler {
     XMFunSDKManager.getInstance().initXMCloudPlatform(applicationContext);
     XMFunSDKManager.getInstance().initLog();
 
+    eventChannel =
+      new EventChannel(
+        flutterPluginBinding.getBinaryMessenger(),
+        "dom_camera/playbackListener"
+      );
+    eventChannel.setStreamHandler(this);
+
     channel =
       new MethodChannel(
         flutterPluginBinding.getBinaryMessenger(),
         "dom_camera"
       );
     channel.setMethodCallHandler(this);
+  }
 
-    channel.invvode
+  @Override
+  public void onListen(Object arguments, EventSink events) {
+    this.eventSink = events;
+  }
+
+  @Override
+  public void onCancel(Object arguments) {
+    this.eventSink = null;
   }
 
   @Override
@@ -342,6 +363,7 @@ public class DomCameraPlugin implements FlutterPlugin, MethodCallHandler {
         position = call.argument("position");
         PlayBackClass.startPlayRecord(
           position,
+          eventSink,
           new DeviceClass.myDomResultInterface() {
             @Override
             public void onSuccess(List<String> dataList) {
