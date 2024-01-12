@@ -107,26 +107,6 @@ class _MonitorHomeScreenState extends State<MonitorHomeScreen> {
     _localStorage.put('usedCameraIds', cameraIds);
 
     setState(() {});
-
-    // final response = await _domCameraPlugin.cameraState(cameraId);
-
-    // if (response["isError"]) {
-    //   if (context.mounted) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       SnackBar(content: Text(response["message"])),
-    //     );
-    //   }
-    // } else {
-    //   final cameraState = response["state"] as String?;
-    //   final existingEntry = usedCameraIds.firstWhere(
-    //     (entry) => entry.cameraId == cameraId,
-    //     orElse: () => CameraEntry(cameraId: cameraId),
-    //   );
-
-    //   existingEntry.cameraState = cameraState;
-
-    //   setState(() {});
-    // }
   }
 
   @override
