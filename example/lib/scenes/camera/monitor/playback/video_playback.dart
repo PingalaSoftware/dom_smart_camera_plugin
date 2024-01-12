@@ -186,7 +186,7 @@ class _VideoPlaybackState extends State<VideoPlayback> {
             SizedBox(
               height: 240,
               child: DecoratedBox(
-                decoration: const BoxDecoration(color: Colors.black),
+                decoration: const BoxDecoration(color: Colors.redAccent),
                 child: _domCameraPlugin.videoPlaybackWidget(),
               ),
             ),

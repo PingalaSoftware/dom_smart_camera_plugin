@@ -32,7 +32,18 @@ class _CameraOptionScreen1State extends State<CameraOptionScreen1> {
     _startLiveView();
 
     eventBus.on<StopLiveStreamEvent>().listen((event) {
-      _stopLiveView();
+      if (!_isLiveView) return;
+      _domCameraPlugin.stopStreaming();
+
+      setState(() {
+        _isLiveView = false;
+      });
+
+      Navigator.pushNamed(
+        context,
+        event.routePath,
+        arguments: {"cameraId": cameraId},
+      );
     });
   }
 

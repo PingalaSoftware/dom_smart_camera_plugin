@@ -70,13 +70,13 @@ class _CameraOptionScreen3State extends State<CameraOptionScreen3> {
               margin: const EdgeInsets.only(right: 4.0, left: 4.0),
               child: GestureDetector(
                 onTap: () {
-                  eventBus.fire(StopLiveStreamEvent());
+                  eventBus.fire(StopLiveStreamEvent(ScreenRoutes.pictureList));
 
-                  Navigator.pushNamed(
-                    context,
-                    ScreenRoutes.pictureList,
-                    arguments: {"cameraId": cameraId},
-                  );
+                  // Navigator.pushNamed(
+                  //   context,
+                  //   ScreenRoutes.pictureList,
+                  //   arguments: {"cameraId": cameraId},
+                  // );
                 },
                 child: OptionsButton(
                   height: 42,

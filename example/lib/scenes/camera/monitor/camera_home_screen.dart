@@ -49,7 +49,7 @@ class _CameraHomeScreenState extends State<CameraHomeScreen> {
                     height: 240,
                     width: MediaQuery.of(context).size.width,
                     child: DecoratedBox(
-                      decoration: const BoxDecoration(color: Colors.black),
+                      decoration: const BoxDecoration(color: Colors.redAccent),
                       child: _domCameraPlugin.cameraStreamWidget(),
                     ),
                   ),
