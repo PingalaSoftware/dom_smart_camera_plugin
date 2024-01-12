@@ -18,6 +18,7 @@ import com.manager.db.DevDataCenter;
 import com.manager.db.XMDevInfo;
 import com.manager.device.DeviceManager;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -40,10 +41,6 @@ public class UserClass {
     BaseAccountManager.OnAccountManagerListener result
   ) {
     manager.deleteDev(cameraId, result);
-  }
-
-  static int getCameraState(String cameraId) {
-    return manager.getDevState(cameraId);
   }
 
   static List<HashMap<String, Object>> DeviceList() {

@@ -1,5 +1,7 @@
 package com.dom.camera.dom_camera;
 
+import static com.dom.camera.dom_camera.UserClass.manager;
+
 import android.content.Context;
 import android.os.Message;
 import android.view.LayoutInflater;
@@ -74,6 +76,8 @@ public class DomCameraPlugin implements FlutterPlugin, MethodCallHandler {
         "dom_camera"
       );
     channel.setMethodCallHandler(this);
+
+    channel.invvode
   }
 
   @Override
@@ -108,13 +112,6 @@ public class DomCameraPlugin implements FlutterPlugin, MethodCallHandler {
           }
         );
         break;
-      case GET_CAMERA_STATE:
-        cameraId = call.argument("cameraId");
-        int data = UserClass.getCameraState(cameraId);
-
-        List<Integer> list = new ArrayList<Integer>(data);
-        list.add(data);
-        break;
       case ADD_CAMERA_THROUGH_WIFI:
         ssid = call.argument("ssid");
         password = call.argument("password");
@@ -130,6 +127,26 @@ public class DomCameraPlugin implements FlutterPlugin, MethodCallHandler {
 
             public void onSuccess(List dataList) {
               result.success(dataList);
+            }
+          }
+        );
+        break;
+      case GET_CAMERA_STATE:
+        cameraId = call.argument("cameraId");
+
+        DeviceClass.cameraLoginState(
+          cameraId,
+          new DeviceClass.myDomResultInterface() {
+            public void onSuccess(List<String> dataList) {
+              result.success(dataList);
+            }
+
+            public void onFailed(String errorId, String message) {
+              result.error(
+                errorId,
+                "Please check the device connection",
+                "" + message
+              );
             }
           }
         );
@@ -158,8 +175,9 @@ public class DomCameraPlugin implements FlutterPlugin, MethodCallHandler {
                   "Please reset the camera and try again",
                   cameraId
                 );
+              } else {
+                result.error("0", "Camera/Device is Offline", cameraId);
               }
-              result.error("0", "Camera/Device is Offline", cameraId);
             }
           }
         );
@@ -173,22 +191,43 @@ public class DomCameraPlugin implements FlutterPlugin, MethodCallHandler {
           this.applicationContext,
           cameraId,
           this.viewCameraActivity,
-                new DeviceClass.myDomResultInterface(){
+          new DeviceClass.myDomResultInterface() {
+            @Override
+            public void onSuccess(List<String> dataList) {
+              result.success(dataList);
+            }
 
-                  @Override
-                  public void onSuccess(List<String> dataList) {
-                    result.success(dataList);
-                  }
+            @Override
+            public void onFailed(String errorId, String message) {
+              result.error(
+                errorId,
+                "Please check the device connection",
+                "" + message
+              );
+            }
+          }
+        );
+        break;
+      case SET_RECORD_TYPE:
+        cameraId = call.argument("cameraId");
+        String type = call.argument("type");
+        System.out.println("Set record type called");
+        DeviceClass.setRecordType(
+          cameraId,
+          type,
+          new DeviceClass.myDomResultInterface() {
+            public void onSuccess(List<String> dataList) {
+              result.success(dataList);
+            }
 
-                  @Override
-                  public void onFailed(String errorId, String message) {
-                    result.error(
-                            errorId,
-                            "Please check the device connection",
-                            "" + message
-                    );
-                  }
-                }
+            public void onFailed(String errorId, String message) {
+              result.error(
+                errorId,
+                "Please check the device connection",
+                "" + message
+              );
+            }
+          }
         );
         break;
       case SET_HUMAN_DETECTION:
@@ -301,23 +340,24 @@ public class DomCameraPlugin implements FlutterPlugin, MethodCallHandler {
         break;
       case PLAY_FROM_POSITION:
         position = call.argument("position");
-        PlayBackClass.startPlayRecord(position,
-                new DeviceClass.myDomResultInterface(){
+        PlayBackClass.startPlayRecord(
+          position,
+          new DeviceClass.myDomResultInterface() {
+            @Override
+            public void onSuccess(List<String> dataList) {
+              result.success(dataList);
+            }
 
-                  @Override
-                  public void onSuccess(List<String> dataList) {
-                    result.success(dataList);
-                  }
-
-                  @Override
-                  public void onFailed(String errorId, String message) {
-                    result.error(
-                            errorId,
-                            "Please check the device connection",
-                            "" + message
-                    );
-                  }
-                });
+            @Override
+            public void onFailed(String errorId, String message) {
+              result.error(
+                errorId,
+                "Please check the device connection",
+                "" + message
+              );
+            }
+          }
+        );
         break;
       case DOWNLOAD_FROM_POSITION:
         position = call.argument("position");

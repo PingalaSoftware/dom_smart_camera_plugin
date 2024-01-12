@@ -1,15 +1,18 @@
 package com.dom.camera.dom_camera;
 
+import static com.dom.camera.dom_camera.UserClass.manager;
+
 import android.content.Context;
 import android.os.Environment;
 import android.view.ViewGroup;
-
+import com.alibaba.fastjson.JSON;
 import com.lib.MsgContent;
 import com.lib.sdk.bean.HandleConfigData;
 import com.lib.sdk.bean.HumanDetectionBean;
 import com.lib.sdk.bean.JsonConfig;
 import com.lib.sdk.bean.PtzCtrlInfoBean;
 import com.lib.sdk.struct.H264_DVR_FILE_DATA;
+import com.manager.account.BaseAccountManager;
 import com.manager.device.DeviceManager;
 import com.manager.device.config.DevConfigInfo;
 import com.manager.device.config.DevConfigManager;
@@ -20,9 +23,9 @@ import com.manager.device.media.monitor.MonitorManager;
 import com.utils.FileUtils;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 public class DeviceClass {
 
@@ -61,6 +64,33 @@ public class DeviceClass {
       DeviceManager.getInstance().loginDev(cameraId, onDevManagerListener);
     } else {
       onDevManagerListener.onFailed("0", 0, "0", 0);
+    }
+  }
+
+  static void cameraLoginState(
+    String cameraId,
+    DeviceClass.myDomResultInterface result
+  ) {
+    System.out.println(manager.getDevList());
+
+    if ((manager.getDevList()).contains(cameraId)) {
+      List<String> devStateList = Arrays.asList(cameraId);
+      manager.updateAllDevStateFromServer(
+        devStateList,
+        new BaseAccountManager.OnDevStateListener() {
+          public void onUpdateDevState(String devId) {}
+
+          public void onUpdateCompleted() {
+            int value = manager.getDevState(cameraId);
+            System.out.println("Login Status is = " + value);
+            ArrayList dataList = new ArrayList<>();
+            dataList.add(value);
+            result.onSuccess(dataList);
+          }
+        }
+      );
+    } else {
+      result.onFailed("0", "CAMERA_NOT_FOUND");
     }
   }
 
@@ -142,80 +172,126 @@ public class DeviceClass {
     devConfigManager.setDevConfig(devConfigInfo);
   }
 
+  static void setRecordType(
+    String cameraId,
+    String type,
+    myDomResultInterface resultCb
+  ) {
+    DevConfigManager devConfigManager = DeviceManager
+      .getInstance()
+      .getDevConfigManager(cameraId);
+
+    DevConfigInfo devConfigInfo = DevConfigInfo.create(
+      new DeviceManager.OnDevManagerListener() {
+        @Override
+        public void onSuccess(String devId, int operationType, Object result) {
+          if (result instanceof String) {
+            System.out.println("video config String data = " + result);
+          } else {
+            System.out.println(
+              "video config json data = " + JSON.toJSONString(result)
+            );
+          }
+          resultCb.onSuccess(new ArrayList<>());
+        }
+
+        @Override
+        public void onFailed(
+          String devId,
+          int msgId,
+          String jsonName,
+          int errorId
+        ) {
+          System.out.println(devId);
+          System.out.println(jsonName);
+          System.out.println("FAILED");
+          System.out.println(errorId);
+          resultCb.onFailed("0", "0");
+        }
+      }
+    );
+    devConfigInfo.setJsonName(JsonConfig.RECORD);
+    devConfigInfo.setChnId(0);
+    devConfigManager.getDevConfig(devConfigInfo);
+  }
+
   static void liveStream(
-          Context context,
-          String cameraId,
-          ViewGroup view,
-          myDomResultInterface resultCb) {
+    Context context,
+    String cameraId,
+    ViewGroup view,
+    myDomResultInterface resultCb
+  ) {
     System.out.println("Live stream Started");
     monitorManager =
-            DeviceManager.getInstance().createMonitorPlayer(view, cameraId);
+      DeviceManager.getInstance().createMonitorPlayer(view, cameraId);
     monitorManager.startMonitor();
     monitorManager.setChnId(1);
     monitorManager.setOnAudioDecibelListener(
-            new OnAudioDecibelListener() {
-              @Override
-              public void onVolume(double v) {}
-            }
+      new OnAudioDecibelListener() {
+        @Override
+        public void onVolume(double v) {}
+      }
     );
-    monitorManager.setOnMediaManagerListener(new MediaManager.OnMediaManagerListener() {
-      @Override
-      public void onMediaPlayState(PlayerAttribute attribute, int state) {
+    monitorManager.setOnMediaManagerListener(
+      new MediaManager.OnMediaManagerListener() {
+        @Override
+        public void onMediaPlayState(PlayerAttribute attribute, int state) {}
 
+        @Override
+        public void onFailed(
+          PlayerAttribute attribute,
+          int msgId,
+          int errorId
+        ) {
+          resultCb.onFailed("0", "0");
+        }
+
+        @Override
+        public void onShowRateAndTime(
+          PlayerAttribute attribute,
+          boolean isShowTime,
+          String time,
+          String rate
+        ) {}
+
+        @Override
+        public void onVideoBufferEnd(PlayerAttribute attribute, MsgContent ex) {
+          resultCb.onSuccess(new ArrayList<>());
+        }
       }
-
-      @Override
-      public void onFailed(PlayerAttribute attribute, int msgId, int errorId) {
-        resultCb.onFailed("0", "0");
-      }
-
-      @Override
-      public void onShowRateAndTime(PlayerAttribute attribute, boolean isShowTime, String time, String rate) {
-
-      }
-
-      @Override
-      public void onVideoBufferEnd(PlayerAttribute attribute, MsgContent ex) {
-        resultCb.onSuccess(new ArrayList<>());
-      }
-    });
+    );
   }
 
   public static void capture(Context context) {
-    String galleryPath =
-      Environment.getExternalStorageDirectory() +
-      File.separator +
-      Environment.DIRECTORY_DCIM +
-      File.separator +
-      "Camera" +
-      File.separator;
+      String galleryPath =
+              Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM + File.separator +
+                      "DOM" + File.separator + "IMAGES" + File.separator;
 
-    if (!FileUtils.isFileAvailable(galleryPath)) {
-      galleryPath =
-        Environment.getExternalStorageDirectory() +
-        File.separator +
-        Environment.DIRECTORY_DCIM +
-        File.separator;
+      File domFolder = new File(Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM + File.separator + "DOM");
+      if (!domFolder.exists()) {domFolder.mkdirs();}
+      File imagesFolder = new File(galleryPath);
+      if (!imagesFolder.exists()) {imagesFolder.mkdirs();}
+
+
+      if (!FileUtils.isFileAvailable(galleryPath)) {
+      galleryPath = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM + File.separator;
     }
 
     monitorManager.capture(galleryPath);
   }
 
   public static void startRecord() {
-    String galleryPath =
-      Environment.getExternalStorageDirectory() +
-      File.separator +
-      Environment.DIRECTORY_DCIM +
-      File.separator +
-      "Camera" +
-      File.separator;
+      String galleryPath =
+              Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM + File.separator +
+                      "DOM" + File.separator + "VIDEOS" + File.separator;
 
-    if (!FileUtils.isFileAvailable(galleryPath)) {
-      galleryPath =
-        Environment.getExternalStorageDirectory() +
-        File.separator +
-        Environment.DIRECTORY_DCIM +
-        File.separator;
+      File domFolder = new File(Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM + File.separator + "DOM");
+      if (!domFolder.exists()) {domFolder.mkdirs();}
+      File videosFolder = new File(galleryPath);
+      if (!videosFolder.exists()) {videosFolder.mkdirs();}
+
+      if (!FileUtils.isFileAvailable(galleryPath)) {
+      galleryPath = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM + File.separator;
     }
 
     if (!monitorManager.isRecord()) {

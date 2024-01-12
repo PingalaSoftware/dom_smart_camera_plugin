@@ -67,18 +67,19 @@ public class ImageList {
       return;
     }
     String galleryPath =
-      Environment.getExternalStorageDirectory() +
-      File.separator +
-      Environment.DIRECTORY_DCIM +
-      File.separator +
-      "Camera" +
-      File.separator;
+            Environment.getExternalStorageDirectory() + File.separator +
+                    "DOM" + File.separator + "IMAGES" + File.separator;
+
+    File domFolder = new File(Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM + File.separator + "DOM");
+    if (!domFolder.exists()) {domFolder.mkdirs();}
+    File imagesFolder = new File(galleryPath);
+    if (!imagesFolder.exists()) {imagesFolder.mkdirs();}
+
 
     if (!FileUtils.isFileAvailable(galleryPath)) {
       galleryPath =
-        Environment.getExternalStorageDirectory() +
-        File.separator +
-        Environment.DIRECTORY_DCIM +
+        Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM +
+        File.separator + Environment.DIRECTORY_DCIM +
         File.separator;
     }
 

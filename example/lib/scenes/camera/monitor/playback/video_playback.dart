@@ -1,8 +1,10 @@
 import 'package:dom_camera/dom_camera.dart';
 import 'package:dom_camera_example/scenes/camera/monitor/options/playback_time_widget.dart';
+import 'package:dom_camera_example/scenes/camera/monitor/playback/time_range_seekbar.dart';
 import 'package:dom_camera_example/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:dom_camera_example/utils/event_bus.dart';
 
 class VideoPlayback extends StatefulWidget {
   final String cameraId;
@@ -25,6 +27,10 @@ class _VideoPlaybackState extends State<VideoPlayback> {
   bool isPlaying = false;
   bool isMuted = true;
 
+  bool isMainPlaybackLoading = false;
+
+  bool isPlaybackLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -36,6 +42,11 @@ class _VideoPlaybackState extends State<VideoPlayback> {
     String formattedYear = DateFormat('yyyy').format(selectedDate);
 
     getPlayBackList(formattedDate, formattedMonth, formattedYear);
+
+    eventBus.on<SeekToPositionPlayback>().listen((event) {
+      print("SeekToPositionPlayback $event");
+      // _domCameraPlugin.skipPlayBack(pickedTime.hour, pickedTime.minute, 00)
+    });
   }
 
   getPlayBackList(String date, String month, String year) async {
@@ -101,8 +112,13 @@ class _VideoPlaybackState extends State<VideoPlayback> {
   }
 
   void onItemClick(List<String> item, int index) async {
+    setState(() {
+      isPlaybackLoading = true;
+    });
     final result = await _domCameraPlugin.playFromPosition(index);
-
+    setState(() {
+      isPlaybackLoading = false;
+    });
     if (result["isError"]) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -178,10 +194,16 @@ class _VideoPlaybackState extends State<VideoPlayback> {
                 child: _domCameraPlugin.videoPlaybackWidget(),
               ),
             ),
+            // TimeRangeSeekBar(
+            //   startTime: DateTime.parse("2024-01-11 08:34:23"),
+            //   endTime: DateTime.parse("2024-01-11 10:21:47"),
+            // ),
+            const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Row(
                 children: [
+                  if (isPlaybackLoading) const CircularProgressIndicator(),
                   IconButton(
                     icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
                     onPressed: () {

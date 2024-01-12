@@ -46,12 +46,16 @@ class DomCamera {
         .setDeviceAlarmCallback(callbackUrl, cameraId);
   }
 
-  // Future<Map<String, dynamic>> cameraState(String cameraId) {
-  //   return DomCameraPlatform.instance.cameraState(cameraId);
-  // }
+  Future<Map<String, dynamic>> cameraState(String cameraId) {
+    return DomCameraPlatform.instance.cameraState(cameraId);
+  }
 
   Future<Map<String, dynamic>> setHumanDetection(bool isEnabled) {
     return DomCameraPlatform.instance.setHumanDetection(isEnabled);
+  }
+
+  Future<Map<String, dynamic>> setRecordType(String type) {
+    return DomCameraPlatform.instance.setRecordType(type);
   }
 
   Future<Map<String, dynamic>> startStreaming() {

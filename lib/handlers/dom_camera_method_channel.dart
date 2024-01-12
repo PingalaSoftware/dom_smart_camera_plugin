@@ -14,6 +14,11 @@ class MethodChannelDomCamera extends DomCameraPlatform {
   bool isDualInterComStarted = false;
   bool isPlaybackStarted = false;
 
+  bool isUserLogged = false;
+  String tempUsername = "";
+  String tempPassword = "";
+  String tempCameraId = "";
+
   @visibleForTesting
   final methodChannel = const MethodChannel('dom_camera');
 
@@ -77,9 +82,6 @@ class MethodChannelDomCamera extends DomCameraPlatform {
     try {
       final apiResponse = await apiService.getDeviceMasterAccount(cameraId);
       if (apiResponse['isError']) return apiResponse;
-      // if (!apiResponse['isOnline']) {
-      //   return {'isError': true, 'message': apiResponse['message']};
-      // }
       final account = apiResponse["account"];
 
       await methodChannel.invokeMethod('LOGIN', {
@@ -89,6 +91,7 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
       await methodChannel.invokeMethod('CAMERA_LOGIN', {"cameraId": cameraId});
       initializedCamera = cameraId;
+      isUserLogged = true;
 
       return {
         "isError": false,
@@ -128,15 +131,37 @@ class MethodChannelDomCamera extends DomCameraPlatform {
     }
   }
 
-  // @override
-  // Future<Map<String, dynamic>> cameraState(String cameraId) async {
-  //   if (initializedCamera.isEmpty || initializedCamera != cameraId) {
-  //     return {"isError": true, "message": "Please Login to Camera!"};
-  //   }
+  @override
+  Future<Map<String, dynamic>> cameraState(String cameraId) async {
+    if (!isUserLogged || initializedCamera != cameraId) {
+      final apiResponse = await apiService.getDeviceMasterAccount(cameraId);
+      if (apiResponse['isError']) return apiResponse;
+      final account = apiResponse["account"];
+      if (tempUsername != account["username"]) {
+        await methodChannel.invokeMethod('LOGIN', {
+          "userName": account["username"],
+          "password": account["password"],
+        });
+      }
+      isUserLogged = true;
+      tempUsername = account["username"];
+      tempPassword = account["password"];
+      tempCameraId = cameraId;
+    }
 
-  //   List<int> state = await methodChannel.invokeMethod('GET_CAMERA_STATE');
-  //   return {"isError": false, "state": state[0]};
-  // }
+    final state = await methodChannel
+        .invokeMethod('GET_CAMERA_STATE', {"cameraId": cameraId});
+
+    if (state[0] == 0) return {"isError": false, "state": "OFF_LINE"};
+    if (state[0] == 1) return {"isError": false, "state": "ON_LINE"};
+    if (state[0] == 2) return {"isError": false, "state": "SLEEP"};
+    if (state[0] == 3) return {"isError": false, "state": "WAKE_UP"};
+    if (state[0] == 4) return {"isError": false, "state": "WAKE"};
+    if (state[0] == 5) return {"isError": false, "state": "SLEEP_UNWAKE"};
+    if (state[0] == 6) return {"isError": false, "state": "PREPARE_SLEEP"};
+
+    return {"isError": true, "message": "PREPARE_SLEEP"};
+  }
 
   @override
   Future<Map<String, dynamic>> setHumanDetection(bool isEnabled) async {
@@ -147,6 +172,29 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
       await methodChannel.invokeMethod('SET_HUMAN_DETECTION',
           {"cameraId": initializedCamera, "isEnabled": isEnabled});
+
+      return {"isError": false};
+    } catch (e) {
+      if (e is PlatformException) {
+        return {"isError": true, "message": e.message};
+      }
+
+      return {"isError": true, "message": "Error: $e"};
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> setRecordType(String type) async {
+    if (type != "ALWAYS" && type != "NEVER" && type != "ALARM") {
+      return {"error": true, "message": "Invalid record type [$type]"};
+    }
+    try {
+      if (initializedCamera.isEmpty) {
+        return {"isError": true, "message": "Please Login to Camera!"};
+      }
+
+      await methodChannel.invokeMethod(
+          'SET_RECORD_TYPE', {"cameraId": initializedCamera, "type": type});
 
       return {"isError": false};
     } catch (e) {

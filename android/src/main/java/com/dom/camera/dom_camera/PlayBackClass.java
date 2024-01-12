@@ -23,6 +23,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+
+
+
+
 public class PlayBackClass {
 
   String deviceID;
@@ -46,18 +50,19 @@ public class PlayBackClass {
     }
 
     String galleryPath =
-      Environment.getExternalStorageDirectory() +
-      File.separator +
-      Environment.DIRECTORY_DCIM +
-      File.separator +
-      "Camera" +
-      File.separator;
+      Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM + File.separator + Environment.DIRECTORY_DCIM +
+      File.separator + "DOM" + File.separator + "VIDEOS" + File.separator;
+
+    File domFolder = new File(Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM +
+            File.separator + "DOM");
+    if (!domFolder.exists()) {domFolder.mkdirs();}
+    File videosFolder = new File(galleryPath);
+    if (!videosFolder.exists()) {videosFolder.mkdirs();}
+
 
     if (!FileUtils.isFileAvailable(galleryPath)) {
       galleryPath =
-        Environment.getExternalStorageDirectory() +
-        File.separator +
-        Environment.DIRECTORY_DCIM +
+        Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM +
         File.separator;
     }
 
@@ -144,7 +149,11 @@ public class PlayBackClass {
           boolean isShowTime,
           String time,
           String rate
-        ) {}
+        ) {
+          System.out.println("Time" + time);
+          System.out.println("rate" + rate);
+          System.out.println("isShowTime" + isShowTime);
+        }
 
         @Override
         public void onVideoBufferEnd(PlayerAttribute attribute, MsgContent ex) {
@@ -197,18 +206,19 @@ public class PlayBackClass {
 
   public static void captureImagePlayback() {
     String galleryPath =
-      Environment.getExternalStorageDirectory() +
-      File.separator +
-      Environment.DIRECTORY_DCIM +
-      File.separator +
-      "Camera" +
-      File.separator;
+            Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM +
+                    File.separator + "DOM" + File.separator + "IMAGES" + File.separator;
+
+    File domFolder = new File(Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM +
+            File.separator + "DOM");
+    if (!domFolder.exists()) {domFolder.mkdirs();}
+    File imagesFolder = new File(galleryPath);
+    if (!imagesFolder.exists()) {imagesFolder.mkdirs();}
+
 
     if (!FileUtils.isFileAvailable(galleryPath)) {
       galleryPath =
-        Environment.getExternalStorageDirectory() +
-        File.separator +
-        Environment.DIRECTORY_DCIM +
+        Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM +
         File.separator;
     }
 
