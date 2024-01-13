@@ -20,10 +20,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'DOM Camera',
       theme: ThemeData(
-        // colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurpleAccent),
-        useMaterial3: true,
-        // colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.white),
-      ),
+          // colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurpleAccent),
+          // useMaterial3: true,
+          // colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.white),
+          ),
       initialRoute: ScreenRoutes.homeScreen,
       onGenerateRoute: AppRoutes.generateRoute,
     );

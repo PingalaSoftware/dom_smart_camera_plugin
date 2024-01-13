@@ -55,39 +55,34 @@ public class PlayBackClass {
       return;
     }
 
-    String galleryPath =
-      Environment.getExternalStorageDirectory() +
-      File.separator +
-      Environment.DIRECTORY_DCIM +
-      File.separator +
-      Environment.DIRECTORY_DCIM +
-      File.separator +
-      "DOM" +
-      File.separator +
-      "VIDEOS" +
-      File.separator;
+    String storagePath = Environment.getExternalStorageDirectory() + File.separator +
+            Environment.DIRECTORY_DCIM + File.separator + "DOM" + File.separator +
+            "PB_VIDEOS" + File.separator;
 
-    File domFolder = new File(
-      Environment.getExternalStorageDirectory() +
-      File.separator +
-      Environment.DIRECTORY_DCIM +
-      File.separator +
-      "DOM"
-    );
+    File domFolder = new File(Environment.getExternalStorageDirectory() +
+            File.separator + Environment.DIRECTORY_DCIM + File.separator + "DOM");
+    File videosFolder = new File(storagePath);
+
     if (!domFolder.exists()) {
+      System.out.println("testing: PB: FOLDER [DOM] DOES NOT EXIST");
       domFolder.mkdirs();
+    } else {
+      System.out.println("testing: PB: FOLDER [DOM] DOES EXIST");
     }
-    File videosFolder = new File(galleryPath);
     if (!videosFolder.exists()) {
+      System.out.println("testing: PB: FOLDER [VIDEOS] DOES NOT EXIST");
       videosFolder.mkdirs();
+    } else {
+      System.out.println("testing: PB: FOLDER [VIDEOS] DOES EXIST");
     }
 
-    if (!FileUtils.isFileAvailable(galleryPath)) {
-      galleryPath =
-        Environment.getExternalStorageDirectory() +
-        File.separator +
-        Environment.DIRECTORY_DCIM +
-        File.separator;
+    if (!FileUtils.isFileAvailable(storagePath)) {
+      System.out.println("testing: PB: FINAL FOLDER DOES NOT EXIST");
+
+      storagePath = Environment.getExternalStorageDirectory() + File.separator +
+              Environment.DIRECTORY_DCIM + File.separator;
+    } else {
+      System.out.println("testing: PB: FINAL FOLDER DOES EXIST");
     }
 
     DownloadManager downloadManager = DownloadManager.getInstance(null);
@@ -105,7 +100,7 @@ public class PlayBackClass {
       downloadInfo.setDevId(deviceId);
       downloadInfo.setObj(data);
       downloadInfo.setDownloadType(DOWNLOAD_VIDEO_BY_FILE);
-      downloadInfo.setSaveFileName(galleryPath + fileName);
+      downloadInfo.setSaveFileName(storagePath + fileName);
       downloadManager.addDownload(downloadInfo);
       downloadManager.startDownload();
       result.onSuccess(new ArrayList<>());
@@ -183,9 +178,7 @@ public class PlayBackClass {
             jsonData.put("isShowTime", isShowTime);
             String jsonString = new Gson().toJson(jsonData);
 
-            SimpleDateFormat dateFormat = new SimpleDateFormat(
-              "yyyy-MM-dd HH:mm:ss"
-            );
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date parsedDate;
             try {
               parsedDate = dateFormat.parse(time);
@@ -227,9 +220,7 @@ public class PlayBackClass {
       searchTime.get(Calendar.YEAR),
       searchTime.get(Calendar.MONTH) + 1,
       searchTime.get(Calendar.DAY_OF_MONTH),
-      0,
-      0,
-      0,
+      0, 0, 0,
     };
 
     int absTime = FunSDK.ToTimeType(time) + times;
@@ -253,40 +244,26 @@ public class PlayBackClass {
   }
 
   public static void captureImagePlayback() {
-    String galleryPath =
-      Environment.getExternalStorageDirectory() +
-      File.separator +
-      Environment.DIRECTORY_DCIM +
-      File.separator +
-      "DOM" +
-      File.separator +
-      "IMAGES" +
-      File.separator;
+    String storagePath = Environment.getExternalStorageDirectory() + File.separator +
+            Environment.DIRECTORY_DCIM + File.separator + "DOM" + File.separator +
+            "PB_IMAGES" + File.separator;
 
-    File domFolder = new File(
-      Environment.getExternalStorageDirectory() +
-      File.separator +
-      Environment.DIRECTORY_DCIM +
-      File.separator +
-      "DOM"
-    );
-    if (!domFolder.exists()) {
-      domFolder.mkdirs();
-    }
-    File imagesFolder = new File(galleryPath);
-    if (!imagesFolder.exists()) {
-      imagesFolder.mkdirs();
+
+
+    File domFolder = new File(Environment.getExternalStorageDirectory() +
+            File.separator + Environment.DIRECTORY_DCIM + File.separator + "DOM");
+    File imagesFolder = new File(storagePath);
+
+
+    if (!domFolder.exists()) {domFolder.mkdirs();}
+    if (!imagesFolder.exists()) {imagesFolder.mkdirs();}
+
+    if (!FileUtils.isFileAvailable(storagePath)) {
+      storagePath = Environment.getExternalStorageDirectory() + File.separator +
+              Environment.DIRECTORY_DCIM + File.separator;
     }
 
-    if (!FileUtils.isFileAvailable(galleryPath)) {
-      galleryPath =
-        Environment.getExternalStorageDirectory() +
-        File.separator +
-        Environment.DIRECTORY_DCIM +
-        File.separator;
-    }
-
-    recordManager.capture(galleryPath);
+    recordManager.capture(storagePath);
   }
 
   public static void startPlayRecord(

@@ -263,39 +263,44 @@ public class DeviceClass {
   }
 
   public static void capture(Context context) {
-      String galleryPath =
-              Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM + File.separator +
-                      "DOM" + File.separator + "IMAGES" + File.separator;
+      String storagePath = Environment.getExternalStorageDirectory() + File.separator +
+              Environment.DIRECTORY_DCIM + File.separator + "DOM" + File.separator +
+              "CP_IMAGES" + File.separator;
 
-      File domFolder = new File(Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM + File.separator + "DOM");
+      File domFolder = new File(Environment.getExternalStorageDirectory() +
+              File.separator + Environment.DIRECTORY_DCIM + File.separator + "DOM");
+      File imagesFolder = new File(storagePath);
+
       if (!domFolder.exists()) {domFolder.mkdirs();}
-      File imagesFolder = new File(galleryPath);
       if (!imagesFolder.exists()) {imagesFolder.mkdirs();}
 
-
-      if (!FileUtils.isFileAvailable(galleryPath)) {
-      galleryPath = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM + File.separator;
+      if (!FileUtils.isFileAvailable(storagePath)) {
+          storagePath = Environment.getExternalStorageDirectory() + File.separator +
+              Environment.DIRECTORY_DCIM + File.separator;
     }
 
-    monitorManager.capture(galleryPath);
+    monitorManager.capture(storagePath);
   }
 
   public static void startRecord() {
-      String galleryPath =
-              Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM + File.separator +
-                      "DOM" + File.separator + "VIDEOS" + File.separator;
+      String storagePath = Environment.getExternalStorageDirectory() + File.separator +
+              Environment.DIRECTORY_DCIM + File.separator + "DOM" + File.separator +
+              "CP_VIDEOS" + File.separator;
 
-      File domFolder = new File(Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM + File.separator + "DOM");
+      File domFolder = new File(Environment.getExternalStorageDirectory() +
+              File.separator + Environment.DIRECTORY_DCIM + File.separator + "DOM");
+      File videosFolder = new File(storagePath);
+
       if (!domFolder.exists()) {domFolder.mkdirs();}
-      File videosFolder = new File(galleryPath);
       if (!videosFolder.exists()) {videosFolder.mkdirs();}
 
-      if (!FileUtils.isFileAvailable(galleryPath)) {
-      galleryPath = Environment.getExternalStorageDirectory() + File.separator + Environment.DIRECTORY_DCIM + File.separator;
-    }
+      if (!FileUtils.isFileAvailable(storagePath)) {
+          storagePath = Environment.getExternalStorageDirectory() + File.separator +
+              Environment.DIRECTORY_DCIM + File.separator;
+      }
 
     if (!monitorManager.isRecord()) {
-      monitorManager.startRecord(galleryPath);
+      monitorManager.startRecord(storagePath);
     }
   }
 
