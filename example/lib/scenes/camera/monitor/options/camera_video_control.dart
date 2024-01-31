@@ -104,13 +104,13 @@ class _CameraVideoControlState extends State<CameraVideoControl> {
           margin: const EdgeInsets.only(right: 4.0),
           child: GestureDetector(
             onTap: () {
-              eventBus.fire(StopLiveStreamEvent(ScreenRoutes.videoPlayback));
+              eventBus.fire(StopLiveStreamEvent());
 
-              // Navigator.pushNamed(
-              //   context,
-              //   ScreenRoutes.videoPlayback,
-              //   arguments: {"cameraId": cameraId},
-              // );
+              Navigator.pushNamed(
+                context,
+                ScreenRoutes.videoPlayback,
+                arguments: {"cameraId": cameraId},
+              );
             },
             child: OptionsButton(
               height: 42,

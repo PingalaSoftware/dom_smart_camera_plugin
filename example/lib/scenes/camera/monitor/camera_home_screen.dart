@@ -5,8 +5,11 @@ import 'package:dom_camera_example/scenes/camera/monitor/camera_options_screen_3
 import 'package:dom_camera_example/scenes/camera/monitor/camera_options_screen_4.dart';
 import 'package:dom_camera_example/scenes/camera/monitor/camera_options_screen_5.dart';
 import 'package:dom_camera_example/scenes/camera/monitor/camera_options_screen_6.dart';
+import 'package:dom_camera_example/utils/constants.dart';
 import 'package:dom_camera_example/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
+
+import '../../../utils/event_bus.dart';
 
 class CameraHomeScreen extends StatefulWidget {
   final String cameraId;
@@ -25,8 +28,8 @@ class _CameraHomeScreenState extends State<CameraHomeScreen> {
 
   @override
   void dispose() async {
-    super.dispose();
     _domCameraPlugin.stopStreaming();
+    super.dispose();
   }
 
   @override
@@ -40,6 +43,20 @@ class _CameraHomeScreenState extends State<CameraHomeScreen> {
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Camera Home Screen $cameraId',
+        actions: [
+          CustomAppBarAction(
+            icon: Icons.settings,
+            callback: () {
+              eventBus.fire(StopLiveStreamEvent());
+
+              Navigator.pushNamed(
+                context,
+                ScreenRoutes.settingsPage,
+                arguments: {"cameraId": cameraId},
+              );
+            },
+          ),
+        ],
       ),
       body: Center(
         child: cameraId.isNotEmpty || isLiveStreamError

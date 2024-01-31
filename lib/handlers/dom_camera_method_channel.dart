@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -94,6 +95,296 @@ class MethodChannelDomCamera extends DomCameraPlatform {
       };
     } catch (e) {
       isRequestPending = false;
+      if (e is PlatformException) {
+        return {"isError": true, "message": e.message};
+      }
+
+      return {"isError": true, "message": "Error: $e"};
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> addCameraWithSerialNumber(
+      String cameraId, String cameraType) async {
+    if (isRequestPending) {
+      return {
+        "isError": true,
+        "message": "PENDING_PREVIOUS_REQUEST",
+        "details": "Called addCameraWithSerialNumber()"
+      };
+    }
+    try {
+      isRequestPending = true;
+      final apiResponse = await apiService.fetchMasterAccount();
+      if (apiResponse['isError']) {
+        isRequestPending = false;
+        return apiResponse;
+      }
+
+      final account = apiResponse["account"];
+      print("Adding camera: s2 --- got master account $account");
+
+      await methodChannel.invokeMethod('LOGIN', {
+        "userName": account["username"],
+        "password": account["password"],
+      });
+      print("Adding camera: s3 --- login success");
+
+      final version =
+          await methodChannel.invokeMethod('ADD_CAMERA_THROUGH_SERIAL_NUMBER', {
+        "cameraId": cameraId,
+        "cameraType": cameraType,
+      });
+      print("Adding camera: s6 --- add with sn success $version");
+
+      final addResponse = await apiService.addDeviceToMasterAccount(
+          version[0], account["username"]);
+      isRequestPending = false;
+      if (addResponse['isError']) return addResponse;
+
+      return {
+        "isError": false,
+        "message": "Camera added successfully",
+        "cameraId": version[0]
+      };
+    } catch (e) {
+      isRequestPending = false;
+      print("Adding camera: s6 --- add with sn failed $e");
+
+      if (e is PlatformException) {
+        return {"isError": true, "message": e.message};
+      }
+
+      return {"isError": true, "message": "Error: $e"};
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getUserInformation(String cameraId) async {
+    if (isRequestPending) {
+      return {
+        "isError": true,
+        "message": "PENDING_PREVIOUS_REQUEST",
+        "details": "Called getUserInformation()"
+      };
+    }
+    try {
+      isRequestPending = true;
+      final apiResponse = await apiService.getDeviceMasterAccount(cameraId);
+      if (apiResponse['isError']) return apiResponse;
+      final account = apiResponse["account"];
+
+      await methodChannel.invokeMethod('LOGIN', {
+        "userName": account["username"],
+        "password": account["password"],
+      });
+
+      final va = await methodChannel.invokeMethod('GET_USER_INFO');
+      Map<String, dynamic> jsonData = json.decode(va[0]);
+
+      return {
+        "isError": false,
+        "details": jsonData["data"],
+      };
+    } catch (e) {
+      isRequestPending = false;
+      if (e is PlatformException) {
+        return {"isError": true, "message": e.message};
+      }
+
+      return {"isError": true, "message": "Error: $e"};
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getCameraName() async {
+    if (isRequestPending) {
+      return {
+        "isError": true,
+        "message": "PENDING_PREVIOUS_REQUEST",
+        "details": "Called getCameraName()"
+      };
+    }
+    try {
+      if (initializedCamera.isEmpty) {
+        return {"isError": true, "message": "Please Login to Camera!"};
+      }
+      isRequestPending = true;
+
+      final data = await methodChannel
+          .invokeMethod('GET_CAMERA_NAME', {"cameraId": initializedCamera});
+      isRequestPending = false;
+
+      return {"isError": false, "details": data[0]};
+    } catch (e) {
+      isRequestPending = false;
+
+      if (e is PlatformException) {
+        return {"isError": true, "message": e.message};
+      }
+
+      return {"isError": true, "message": "Error: $e"};
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> setCameraName(String newName) async {
+    if (isRequestPending) {
+      return {
+        "isError": true,
+        "message": "PENDING_PREVIOUS_REQUEST",
+        "details": "Called setCameraName()"
+      };
+    }
+    try {
+      if (initializedCamera.isEmpty) {
+        return {"isError": true, "message": "Please Login to Camera!"};
+      }
+      isRequestPending = true;
+
+      await methodChannel.invokeMethod('SET_CAMERA_NAME', {
+        "cameraId": initializedCamera,
+        "newName": newName,
+      });
+      isRequestPending = false;
+
+      return {"isError": false};
+    } catch (e) {
+      isRequestPending = false;
+
+      if (e is PlatformException) {
+        return {"isError": true, "message": e.message};
+      }
+
+      return {"isError": true, "message": "Error: $e"};
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> addPresetPoint(int presetId) async {
+    if (isRequestPending) {
+      return {
+        "isError": true,
+        "message": "PENDING_PREVIOUS_REQUEST",
+        "details": "Called addPresetPoint()"
+      };
+    }
+    try {
+      if (initializedCamera.isEmpty) {
+        return {"isError": true, "message": "Please Login to Camera!"};
+      }
+      isRequestPending = true;
+      print("calling add Preset: ");
+
+      await methodChannel.invokeMethod('ADD_PRESET',
+          {"cameraId": initializedCamera, "presetId": presetId, "chnNo": 1});
+      isRequestPending = false;
+
+      return {"isError": false};
+    } catch (e) {
+      isRequestPending = false;
+
+      if (e is PlatformException) {
+        return {"isError": true, "message": e.message};
+      }
+
+      return {"isError": true, "message": "Error: $e"};
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> turnToPreset(int presetId) async {
+    if (isRequestPending) {
+      return {
+        "isError": true,
+        "message": "PENDING_PREVIOUS_REQUEST",
+        "details": "Called turnToPreset()"
+      };
+    }
+    try {
+      if (initializedCamera.isEmpty) {
+        return {"isError": true, "message": "Please Login to Camera!"};
+      }
+      isRequestPending = true;
+
+      await methodChannel.invokeMethod('TURN_TO_PRESET',
+          {"cameraId": initializedCamera, "presetId": presetId, "chnNo": 1});
+      isRequestPending = false;
+
+      return {"isError": false};
+    } catch (e) {
+      isRequestPending = false;
+
+      if (e is PlatformException) {
+        return {"isError": true, "message": e.message};
+      }
+
+      return {"isError": true, "message": "Error: $e"};
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getConfiguration(String type) async {
+    if (isRequestPending) {
+      return {
+        "isError": true,
+        "message": "PENDING_PREVIOUS_REQUEST",
+        "details": "Called getConfiguration($type)"
+      };
+    }
+    try {
+      if (initializedCamera.isEmpty) {
+        return {"isError": true, "message": "Please Login to Camera!"};
+      }
+      isRequestPending = true;
+      print("calling getConfiguration: $type");
+
+      List data = await methodChannel.invokeMethod('GET_CONFIG', {
+        "cameraId": initializedCamera,
+        "type": type,
+      });
+      isRequestPending = false;
+      print("getConfiguration data: $data");
+      print("getConfiguration details: $data[0]");
+      return {"isError": false, "details": data[0]};
+    } catch (e) {
+      isRequestPending = false;
+
+      if (e is PlatformException) {
+        return {"isError": true, "message": e.message};
+      }
+
+      return {"isError": true, "message": "Error: $e"};
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> setConfiguration(
+      String type, String newConfig) async {
+    if (isRequestPending) {
+      return {
+        "isError": true,
+        "message": "PENDING_PREVIOUS_REQUEST",
+        "details": "Called setConfiguration($type)"
+      };
+    }
+    try {
+      if (initializedCamera.isEmpty) {
+        return {"isError": true, "message": "Please Login to Camera!"};
+      }
+      isRequestPending = true;
+
+      await methodChannel.invokeMethod('SET_CONFIG', {
+        "cameraId": initializedCamera,
+        "type": type,
+        "newConfig": newConfig,
+      });
+      isRequestPending = false;
+
+      return {"isError": false};
+    } catch (e) {
+      isRequestPending = false;
+
       if (e is PlatformException) {
         return {"isError": true, "message": e.message};
       }

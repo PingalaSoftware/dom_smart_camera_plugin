@@ -26,6 +26,14 @@ abstract class DomCameraPlatform extends PlatformInterface {
     throw UnimplementedError('cameraLogin() has not been implemented.');
   }
 
+  Future<Map<String, dynamic>> getCameraName() {
+    throw UnimplementedError('getCameraName() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> setCameraName(String newName) {
+    throw UnimplementedError('setCameraName() has not been implemented.');
+  }
+
   Future<Map<String, dynamic>> setDeviceAlarmCallback(
       String callbackUrl, String? cameraId) {
     throw UnimplementedError(
@@ -117,5 +125,31 @@ abstract class DomCameraPlatform extends PlatformInterface {
   Map<String, dynamic> captureImageFromPlayBack() {
     throw UnimplementedError(
         'captureImageFromPlayBack() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> addCameraWithSerialNumber(
+      String cameraId, String cameraType) {
+    throw UnimplementedError(
+        'addCameraWithSerialNumber() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> getUserInformation(String cameraId) {
+    throw UnimplementedError('getUserInformation() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> addPresetPoint(int presetId) {
+    throw UnimplementedError('addPresetPoint() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> turnToPreset(int presetId) {
+    throw UnimplementedError('turnToPreset() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> getConfiguration(String type) {
+    throw UnimplementedError('getConfiguration() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> setConfiguration(String type, String newConfig) {
+    throw UnimplementedError('setConfiguration() has not been implemented.');
   }
 }

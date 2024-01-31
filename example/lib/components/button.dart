@@ -45,6 +45,7 @@ class OptionsButton extends StatelessWidget {
                   const SizedBox(width: 3),
                   Text(
                     text ?? "",
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       color:
                           textColor ?? Theme.of(context).secondaryHeaderColor,

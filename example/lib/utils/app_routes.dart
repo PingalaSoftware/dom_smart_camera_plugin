@@ -3,6 +3,7 @@ import 'package:dom_camera_example/scenes/camera/monitor/camera_home_screen.dart
 import 'package:dom_camera_example/scenes/camera/monitor/monitor_home_screen.dart';
 import 'package:dom_camera_example/scenes/camera/monitor/playback/picture_list.dart';
 import 'package:dom_camera_example/scenes/camera/monitor/playback/video_playback.dart';
+import 'package:dom_camera_example/scenes/camera/monitor/settings/setting_page.dart';
 import 'package:dom_camera_example/utils/constants.dart';
 import 'package:dom_camera_example/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +34,12 @@ class AppRoutes {
 
         return MaterialPageRoute(
             builder: (_) => PictureList(cameraId: args["cameraId"]));
+
+      case ScreenRoutes.settingsPage:
+        final args = settings.arguments as Map<String, dynamic>;
+
+        return MaterialPageRoute(
+            builder: (_) => SettingsPage(cameraId: args["cameraId"]));
 
       default:
         return _errorRoute();

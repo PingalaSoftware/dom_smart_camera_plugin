@@ -1,5 +1,6 @@
 package com.dom.camera.dom_camera;
 
+import static com.dom.camera.dom_camera.UserClass.deviceManager;
 import static com.dom.camera.dom_camera.UserClass.manager;
 
 import android.content.Context;
@@ -91,17 +92,14 @@ public class DomCameraPlugin
     channel.setMethodCallHandler(this);
   }
 
-  @Override
   public void onListen(Object arguments, EventSink events) {
     this.eventSink = events;
   }
 
-  @Override
   public void onCancel(Object arguments) {
     this.eventSink = null;
   }
 
-  @Override
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
     MethodName methodName = MethodName.valueOf(call.method.toUpperCase());
 
@@ -133,7 +131,33 @@ public class DomCameraPlugin
           }
         );
         break;
-      case ADD_CAMERA_THROUGH_WIFI:
+        case GET_USER_INFO:
+            UserClass.getUserInfo(new DeviceClass.myDomResultInterface() {
+                public void onSuccess(List<String> dataList) {
+                    result.success(dataList);
+                }
+                public void onFailed(String errorId, String message) {
+                    result.error(errorId, message, null);
+                }
+            });
+            break;
+        case ADD_CAMERA_THROUGH_SERIAL_NUMBER:
+            cameraId = call.argument("cameraId");
+            String cameraType = call.argument("cameraType");
+            System.out.println("Adding camera: s4 --- in android cameraId: "+ cameraId+ " cameraType: "+ cameraType);
+
+            UserClass.addDev(cameraId, cameraType, new DeviceClass.myDomResultInterface() {
+                public void onSuccess(List<String> dataList) {
+                    System.out.println("Adding camera: s5 --- Success: "+ dataList);
+                    result.success(dataList);
+                }
+                public void onFailed(String errorId, String message) {
+                    System.out.println("Adding camera: s5 --- failed errorId: "+ errorId+ " message: "+ message);
+                    result.error(errorId, message, null);
+                }
+            });
+            break;
+        case ADD_CAMERA_THROUGH_WIFI:
         ssid = call.argument("ssid");
         password = call.argument("password");
 
@@ -181,6 +205,14 @@ public class DomCameraPlugin
             public void onSuccess(String devId, int operationType, Object o) {
               List<Object> list = new ArrayList<>();
               list.add(true);
+              UserClass.initPresetManager(cameraId, new UserClass.PresetOperationCallback() {
+                  public void onPresetOperationSuccess() {
+                      System.out.println("init preset manager success");
+                  }
+                  public void onPresetOperationFailed(String errorCode, String errorMessage) {
+                      System.out.println("init preset manager failed");
+                  }
+              });
               result.success(list);
             }
 
@@ -203,6 +235,50 @@ public class DomCameraPlugin
           }
         );
         break;
+      case GET_CAMERA_NAME:
+            cameraId = call.argument("cameraId");
+            DeviceClass.getCameraName(cameraId, new DeviceClass.myDomResultInterface() {
+                public void onSuccess(List<String> dataList) {result.success(dataList);}
+                public void onFailed(String errorId, String message) {
+                    result.error(errorId, message, "Please check the device connection");
+                }
+            });
+            break;
+
+      case ADD_PRESET:
+          cameraId = call.argument("cameraId");
+          int presetId = call.argument("presetId");
+          int chnId = call.argument("chnNo");
+          UserClass.addPreset(cameraId, presetId, chnId, new DeviceClass.myDomResultInterface() {
+              public void onSuccess(List<String> dataList) {result.success(dataList);}
+              public void onFailed(String errorId, String message) {
+                  result.error(errorId, message, "Please check the device connection");
+              }
+          });
+          break;
+      case TURN_TO_PRESET:
+          cameraId = call.argument("cameraId");
+          int turnToPresetId = call.argument("presetId");
+          int chnNo = call.argument("chnNo");
+
+          UserClass.turnToPreset(cameraId, turnToPresetId, chnNo, new DeviceClass.myDomResultInterface() {
+              public void onSuccess(List<String> dataList) {result.success(dataList);}
+              public void onFailed(String errorId, String message) {
+                  result.error(errorId, message, "Please check the device connection");
+              }
+          });
+          break;
+      case SET_CAMERA_NAME:
+          cameraId = call.argument("cameraId");
+          String newName = call.argument("newName");
+          DeviceClass.setCameraName(cameraId, newName, new DeviceClass.myDomResultInterface() {
+              public void onSuccess(List<String> dataList) {result.success(dataList);}
+              public void onFailed(String errorId, String message) {
+                  result.error(errorId, message, "Please check the device connection");
+              }
+          });
+          break;
+
       case STOP_STREAM:
         DeviceClass.stopStream();
         break;
@@ -243,14 +319,46 @@ public class DomCameraPlugin
 
             public void onFailed(String errorId, String message) {
               result.error(
-                errorId,
-                "Please check the device connection",
-                "" + message
+                      errorId,
+                      message,
+                      "Please check the device connection"
               );
             }
           }
         );
         break;
+      case GET_CONFIG:
+          cameraId = call.argument("cameraId");
+          String getType = call.argument("type");
+          System.out.println("GET config type called");
+          DeviceClass.getConfig(cameraId, getType, new DeviceClass.myDomResultInterface() {
+                      public void onSuccess(List<String> dataList) {
+                          result.success(dataList);
+                      }
+
+                      public void onFailed(String errorId, String message) {
+                          result.error(errorId, message, "Please check the device connection");
+                      }
+                  }
+          );
+            break;
+      case SET_CONFIG:
+          cameraId = call.argument("cameraId");
+          String setType = call.argument("type");
+          String newConfig = call.argument("newConfig");
+          System.out.println("Set config type called");
+          DeviceClass.updateConfig(cameraId, setType, newConfig, new DeviceClass.myDomResultInterface() {
+                      public void onSuccess(List<String> dataList) {
+                          result.success(dataList);
+                      }
+
+                      public void onFailed(String errorId, String message) {
+                          result.error(errorId, message, "Please check the device connection");
+                      }
+                  }
+          );
+          break;
+
       case SET_HUMAN_DETECTION:
         cameraId = call.argument("cameraId");
         boolean isEnabled = call.argument("isEnabled");

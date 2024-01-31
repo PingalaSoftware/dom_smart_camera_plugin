@@ -52,7 +52,7 @@ public class ImageList {
     endTime.set(Calendar.SECOND, 59);
 
     SearchFileInfo searchFileInfo = new SearchFileInfo();
-    searchFileInfo.setChnId(0);
+    searchFileInfo.setChnId(1);
     searchFileInfo.setStartTime(startTime);
     searchFileInfo.setEndTime(endTime);
     fileManager.searchPictureByFile(deviceId, searchFileInfo);

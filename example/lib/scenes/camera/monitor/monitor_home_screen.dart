@@ -118,9 +118,7 @@ class _MonitorHomeScreenState extends State<MonitorHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'Monitor Camera',
-      ),
+      appBar: const CustomAppBar(title: 'Monitor Camera'),
       body: Column(
         children: [
           Container(

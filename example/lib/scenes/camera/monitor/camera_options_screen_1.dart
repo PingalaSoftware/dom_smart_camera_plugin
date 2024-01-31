@@ -1,6 +1,7 @@
 import 'package:dom_camera/dom_camera.dart';
 import 'package:dom_camera_example/components/button.dart';
 import 'package:dom_camera_example/scenes/camera/monitor/options/main_stream_audio_control.dart';
+import 'package:dom_camera_example/scenes/camera/monitor/options/preset_point.dart';
 import 'package:dom_camera_example/utils/event_bus.dart';
 import 'package:flutter/material.dart';
 
@@ -35,15 +36,7 @@ class _CameraOptionScreen1State extends State<CameraOptionScreen1> {
       if (!_isLiveView) return;
       _domCameraPlugin.stopStreaming();
 
-      setState(() {
-        _isLiveView = false;
-      });
-
-      Navigator.pushNamed(
-        context,
-        event.routePath,
-        arguments: {"cameraId": cameraId},
-      );
+      _stopLiveView();
     });
   }
 
@@ -91,6 +84,7 @@ class _CameraOptionScreen1State extends State<CameraOptionScreen1> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           MainStreamAudioControl(cameraId: cameraId),
+          const PresetPoint(),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(left: 4.0),

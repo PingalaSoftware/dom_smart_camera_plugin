@@ -124,7 +124,7 @@ public class PlayBackClass {
     this.year = year;
     recordManager =
       deviceManager.createRecordPlayer(viewGroup, deviceID, PLAY_DEV_PLAYBACK);
-    recordManager.setChnId(0);
+    recordManager.setChnId(1);
     searchRecordByFile();
     new XMRecyclerView(viewGroup.getContext(), null);
     recordManager.setOnMediaManagerListener(
