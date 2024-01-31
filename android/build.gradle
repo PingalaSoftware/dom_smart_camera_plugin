@@ -40,7 +40,7 @@ android {
     dependencies {
         testImplementation 'junit:junit:4.13.2'
         testImplementation 'org.mockito:mockito-core:5.0.0'
-        implementation 'io.github.xmcamera:libxmfunsdk:2.4'
+        implementation 'io.github.xmcamera:libxmfunsdk:4.2'
     }
 
     testOptions {

@@ -39,24 +39,22 @@ class _CameraOptionScreen6State extends State<CameraOptionScreen6> {
       isFunctionInProgress = true;
     });
 
-    print("calling set record: $recordType");
     final data = await _domCameraPlugin.setRecordType(recordType);
-    print("RESULT OF SET data: $data");
-    // if (data["isError"]) {
-    //   if (context.mounted) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       SnackBar(content: Text(data['message'])),
-    //     );
-    //   }
-    // } else {
-    //   if (context.mounted) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       const SnackBar(
-    //         content: Text("Record Setting updated"),
-    //       ),
-    //     );
-    //   }
-    // }
+    if (data["isError"]) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'])),
+        );
+      }
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Record Setting updated"),
+          ),
+        );
+      }
+    }
 
     setState(() {
       isFunctionInProgress = false;

@@ -54,10 +54,35 @@ class _PresetPointState extends State<PresetPoint> {
                     child: GestureDetector(
                       onTap: () async {
                         String enteredRange = presetRangeController.text;
-                        print("Preset: 000 $enteredRange");
-                        final result = await _domCameraPlugin
-                            .turnToPreset(int.parse(enteredRange));
-                        print("_domCameraPlugin result $result");
+
+                        if (_isValidEnteredValue(enteredRange)) {
+                          final data = await _domCameraPlugin
+                              .turnToPreset(int.parse(enteredRange));
+
+                          if (data["isError"]) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(data['message'])),
+                              );
+                            }
+                          } else {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Command successful"),
+                                ),
+                              );
+                            }
+                          }
+                        } else {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Invalid value"),
+                              ),
+                            );
+                          }
+                        }
                       },
                       child: OptionsButton(
                         text: "Call",
@@ -97,16 +122,34 @@ class _PresetPointState extends State<PresetPoint> {
                     child: ElevatedButton(
                       onPressed: () async {
                         String enteredValue = enteredValueController.text;
-                        // if (_isValidEnteredValue(enteredValue)) {
-                        //   // Perform actions for a valid entered value
-                        // } else {
-                        //   // Handle invalid entered value
-                        // }
+                        if (_isValidEnteredValue(enteredValue)) {
+                          final data = await _domCameraPlugin
+                              .addPresetPoint(int.parse(enteredValue));
 
-                        print("Preset: 000 $enteredValue");
-                        final result = await _domCameraPlugin
-                            .addPresetPoint(int.parse(enteredValue));
-                        print("_domCameraPlugin add result $result");
+                          if (data["isError"]) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(data['message'])),
+                              );
+                            }
+                          } else {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Preset set successfully"),
+                                ),
+                              );
+                            }
+                          }
+                        } else {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Invalid value"),
+                              ),
+                            );
+                          }
+                        }
                       },
                       child: const Text("Setup"),
                     ),
@@ -120,11 +163,12 @@ class _PresetPointState extends State<PresetPoint> {
     );
   }
 
-  bool _isValidPresetRange(String range) {
-    return true;
-  }
-
   bool _isValidEnteredValue(String value) {
-    return true;
+    try {
+      int parsedValue = int.parse(value);
+      return parsedValue >= 1 && parsedValue <= 255;
+    } catch (e) {
+      return false;
+    }
   }
 }

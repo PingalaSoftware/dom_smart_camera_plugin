@@ -152,4 +152,13 @@ abstract class DomCameraPlatform extends PlatformInterface {
   Future<Map<String, dynamic>> setConfiguration(String type, String newConfig) {
     throw UnimplementedError('setConfiguration() has not been implemented.');
   }
+
+  Future<Map<String, dynamic>> getWifiInfo() {
+    throw UnimplementedError('getWifiInfo() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> getBatteryPercentage() {
+    throw UnimplementedError(
+        'getBatteryPercentage() has not been implemented.');
+  }
 }

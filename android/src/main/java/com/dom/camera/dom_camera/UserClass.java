@@ -105,16 +105,10 @@ public class UserClass {
       return;
     }
 
-    deviceManager.startQuickSetWiFi(
-      wifiInfo,
-      scanResult,
-      dhcpInfo,
-      password,
-      (xmDevInfo, errorId) -> {
-        manager.addDev(
-          xmDevInfo,
-          true,
-          new BaseAccountManager.OnAccountManagerListener() {
+
+
+    deviceManager.startQuickSetWiFi(wifiInfo.getSSID(), password, scanResult.capabilities, dhcpInfo, 1000, (xmDevInfo, errorId) -> {
+        manager.addDev(xmDevInfo, true, new BaseAccountManager.OnAccountManagerListener() {
             public void onSuccess(int msgId) {}
 
             public void onFailed(int msgId, int errorId) {}

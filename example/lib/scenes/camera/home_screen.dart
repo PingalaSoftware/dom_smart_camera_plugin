@@ -149,9 +149,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               builder: (BuildContext context) {
                                 return AddCameraWithSerialNumber(
                                   onSubmit: (cameraId, cameraType) {
-                                    print('Camera ID: $cameraId');
-                                    print('Camera Type: $cameraType');
-
                                     Navigator.of(context).pop();
 
                                     initialiseCameraWithSerialNumber(
@@ -327,8 +324,38 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
+    setState(() {
+      isCameraInitializing = true;
+    });
+
     final result =
         await _domCameraPlugin.addCameraWithSerialNumber(cameraId, cameraType);
-    print("Adding camera: s1 --- result $result");
+    setState(() {
+      isCameraInitializing = false;
+    });
+    if (result["isError"]) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result["message"])),
+        );
+      }
+      return;
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(localContext).showSnackBar(
+          SnackBar(content: Text(result['message'])),
+        );
+      }
+
+      addCameraId(result["cameraId"]);
+      if (context.mounted) {
+        textCopyDialog(
+          localContext,
+          "Camera ID",
+          'Please save the Camera ID somewhere safe',
+          result["cameraId"],
+        );
+      }
+    }
   }
 }

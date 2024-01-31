@@ -256,4 +256,12 @@ class DomCamera {
   Future<Map<String, dynamic>> formatStorage() {
     return DomCameraPlatform.instance.setConfiguration("STORAGE_INFO", "");
   }
+
+  Future<Map<String, dynamic>> getWifiInfo() {
+    return DomCameraPlatform.instance.getWifiInfo();
+  }
+
+  Future<Map<String, dynamic>> getBatteryPercentage() {
+    return DomCameraPlatform.instance.getBatteryPercentage();
+  }
 }

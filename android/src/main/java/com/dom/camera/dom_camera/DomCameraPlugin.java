@@ -144,15 +144,12 @@ public class DomCameraPlugin
         case ADD_CAMERA_THROUGH_SERIAL_NUMBER:
             cameraId = call.argument("cameraId");
             String cameraType = call.argument("cameraType");
-            System.out.println("Adding camera: s4 --- in android cameraId: "+ cameraId+ " cameraType: "+ cameraType);
 
             UserClass.addDev(cameraId, cameraType, new DeviceClass.myDomResultInterface() {
                 public void onSuccess(List<String> dataList) {
-                    System.out.println("Adding camera: s5 --- Success: "+ dataList);
                     result.success(dataList);
                 }
                 public void onFailed(String errorId, String message) {
-                    System.out.println("Adding camera: s5 --- failed errorId: "+ errorId+ " message: "+ message);
                     result.error(errorId, message, null);
                 }
             });
@@ -358,6 +355,35 @@ public class DomCameraPlugin
                   }
           );
           break;
+
+        case GET_WIFI_SIGNAL:
+            cameraId = call.argument("cameraId");
+
+            DeviceClass.getDevWiFiSignalLevel(cameraId, new DeviceClass.myDomResultInterface() {
+                public void onSuccess(List<String> dataList) {
+                    result.success(dataList);
+                }
+
+                public void onFailed(String errorId, String message) {
+                    result.error(errorId, message, "Please check the device connection");
+                }
+            });
+            break;
+
+
+        case GET_BATTERY_PERCENTAGE:
+            cameraId = call.argument("cameraId");
+
+            DeviceClass.getBatteryPercentage(cameraId, new DeviceClass.myDomResultInterface() {
+                public void onSuccess(List<String> dataList) {
+                    result.success(dataList);
+                }
+
+                public void onFailed(String errorId, String message) {
+                    result.error(errorId, message, "Please check the device connection");
+                }
+            });
+            break;
 
       case SET_HUMAN_DETECTION:
         cameraId = call.argument("cameraId");

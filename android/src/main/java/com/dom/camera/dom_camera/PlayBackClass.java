@@ -4,6 +4,7 @@ import static com.manager.db.Define.DOWNLOAD_VIDEO_BY_FILE;
 import static com.manager.device.media.MediaManager.PLAY_DEV_PLAYBACK;
 
 import android.os.Environment;
+import android.view.View;
 import android.view.ViewGroup;
 import com.google.gson.Gson;
 import com.lib.FunSDK;
@@ -55,34 +56,38 @@ public class PlayBackClass {
       return;
     }
 
-    String storagePath = Environment.getExternalStorageDirectory() + File.separator +
-            Environment.DIRECTORY_DCIM + File.separator + "DOM" + File.separator +
-            "PB_VIDEOS" + File.separator;
+    String storagePath =
+      Environment.getExternalStorageDirectory() +
+      File.separator +
+      Environment.DIRECTORY_DCIM +
+      File.separator +
+      "DOM" +
+      File.separator +
+      "PB_VIDEOS" +
+      File.separator;
 
-    File domFolder = new File(Environment.getExternalStorageDirectory() +
-            File.separator + Environment.DIRECTORY_DCIM + File.separator + "DOM");
+    File domFolder = new File(
+      Environment.getExternalStorageDirectory() +
+      File.separator +
+      Environment.DIRECTORY_DCIM +
+      File.separator +
+      "DOM"
+    );
     File videosFolder = new File(storagePath);
 
     if (!domFolder.exists()) {
-      System.out.println("testing: PB: FOLDER [DOM] DOES NOT EXIST");
       domFolder.mkdirs();
-    } else {
-      System.out.println("testing: PB: FOLDER [DOM] DOES EXIST");
     }
     if (!videosFolder.exists()) {
-      System.out.println("testing: PB: FOLDER [VIDEOS] DOES NOT EXIST");
       videosFolder.mkdirs();
-    } else {
-      System.out.println("testing: PB: FOLDER [VIDEOS] DOES EXIST");
     }
 
     if (!FileUtils.isFileAvailable(storagePath)) {
-      System.out.println("testing: PB: FINAL FOLDER DOES NOT EXIST");
-
-      storagePath = Environment.getExternalStorageDirectory() + File.separator +
-              Environment.DIRECTORY_DCIM + File.separator;
-    } else {
-      System.out.println("testing: PB: FINAL FOLDER DOES EXIST");
+      storagePath =
+        Environment.getExternalStorageDirectory() +
+        File.separator +
+        Environment.DIRECTORY_DCIM +
+        File.separator;
     }
 
     DownloadManager downloadManager = DownloadManager.getInstance(null);
@@ -129,7 +134,6 @@ public class PlayBackClass {
     new XMRecyclerView(viewGroup.getContext(), null);
     recordManager.setOnMediaManagerListener(
       new MediaManager.OnRecordManagerListener() {
-        @Override
         public void searchResult(PlayerAttribute attribute, Object data) {
           if (data != null) {
             if (data instanceof H264_DVR_FILE_DATA[]) {
@@ -167,6 +171,13 @@ public class PlayBackClass {
           PlayerAttribute attribute,
           boolean isShowTime,
           String time,
+          long rate
+        ) {}
+
+        public void onShowRateAndTime(
+          PlayerAttribute attribute,
+          boolean isShowTime,
+          String time,
           String rate
         ) {
           if (eventSink != null) {
@@ -178,7 +189,9 @@ public class PlayBackClass {
             jsonData.put("isShowTime", isShowTime);
             String jsonString = new Gson().toJson(jsonData);
 
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat dateFormat = new SimpleDateFormat(
+              "yyyy-MM-dd HH:mm:ss"
+            );
             Date parsedDate;
             try {
               parsedDate = dateFormat.parse(time);
@@ -196,13 +209,14 @@ public class PlayBackClass {
           }
         }
 
-        @Override
         public void onVideoBufferEnd(PlayerAttribute attribute, MsgContent ex) {
           if (isStartPlaybackCalled) {
             isStartPlaybackCalled = false;
             resultCallback.onSuccess(new ArrayList<>());
           }
         }
+
+        public void onPlayStateClick(View view) {}
       }
     );
   }
@@ -220,7 +234,9 @@ public class PlayBackClass {
       searchTime.get(Calendar.YEAR),
       searchTime.get(Calendar.MONTH) + 1,
       searchTime.get(Calendar.DAY_OF_MONTH),
-      0, 0, 0,
+      0,
+      0,
+      0,
     };
 
     int absTime = FunSDK.ToTimeType(time) + times;
@@ -244,23 +260,38 @@ public class PlayBackClass {
   }
 
   public static void captureImagePlayback() {
-    String storagePath = Environment.getExternalStorageDirectory() + File.separator +
-            Environment.DIRECTORY_DCIM + File.separator + "DOM" + File.separator +
-            "PB_IMAGES" + File.separator;
+    String storagePath =
+      Environment.getExternalStorageDirectory() +
+      File.separator +
+      Environment.DIRECTORY_DCIM +
+      File.separator +
+      "DOM" +
+      File.separator +
+      "PB_IMAGES" +
+      File.separator;
 
-
-
-    File domFolder = new File(Environment.getExternalStorageDirectory() +
-            File.separator + Environment.DIRECTORY_DCIM + File.separator + "DOM");
+    File domFolder = new File(
+      Environment.getExternalStorageDirectory() +
+      File.separator +
+      Environment.DIRECTORY_DCIM +
+      File.separator +
+      "DOM"
+    );
     File imagesFolder = new File(storagePath);
 
-
-    if (!domFolder.exists()) {domFolder.mkdirs();}
-    if (!imagesFolder.exists()) {imagesFolder.mkdirs();}
+    if (!domFolder.exists()) {
+      domFolder.mkdirs();
+    }
+    if (!imagesFolder.exists()) {
+      imagesFolder.mkdirs();
+    }
 
     if (!FileUtils.isFileAvailable(storagePath)) {
-      storagePath = Environment.getExternalStorageDirectory() + File.separator +
-              Environment.DIRECTORY_DCIM + File.separator;
+      storagePath =
+        Environment.getExternalStorageDirectory() +
+        File.separator +
+        Environment.DIRECTORY_DCIM +
+        File.separator;
     }
 
     recordManager.capture(storagePath);
