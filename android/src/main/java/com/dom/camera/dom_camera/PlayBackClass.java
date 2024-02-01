@@ -38,9 +38,12 @@ public class PlayBackClass {
   DeviceManager deviceManager = DeviceManager.getInstance();
   static RecordManager recordManager;
   static List<H264_DVR_FILE_DATA> dataList;
-  static String date;
-  static String month;
-  static String year;
+  static String fromDate;
+  static String fromMonth;
+  static String fromYear;
+  static String toDate;
+  static String toMonth;
+  static String toYear;
   static boolean isStartPlaybackCalled = false;
   static DeviceClass.myDomResultInterface resultCallback;
   static Calendar playBackEndTime;
@@ -117,19 +120,27 @@ public class PlayBackClass {
   public PlayBackClass(
     String deviceID,
     ViewGroup viewGroup,
-    String date,
-    String month,
-    String year,
+    String fromDate,
+    String fromMonth,
+    String fromYear,
+    String toDate,
+    String toMonth,
+    String toYear,
     DeviceClass.myDomResultInterface result
   ) {
     this.deviceID = deviceID;
     this.viewGroup = viewGroup;
-    this.date = date;
-    this.month = month;
-    this.year = year;
+    this.fromDate = fromDate;
+    this.fromMonth = fromMonth;
+    this.fromYear = fromYear;
+    this.toDate = toDate;
+    this.toMonth = toMonth;
+    this.toYear = toYear;
     recordManager =
       deviceManager.createRecordPlayer(viewGroup, deviceID, PLAY_DEV_PLAYBACK);
-    recordManager.setChnId(1);
+    recordManager.setChnId(0);
+    recordManager.setTouchable(false);
+
     searchRecordByFile();
     new XMRecyclerView(viewGroup.getContext(), null);
     recordManager.setOnMediaManagerListener(
@@ -151,7 +162,9 @@ public class PlayBackClass {
         }
 
         @Override
-        public void onMediaPlayState(PlayerAttribute attribute, int state) {}
+        public void onMediaPlayState(PlayerAttribute attribute, int state) {
+          System.out.println("onMediaPlayState");
+        }
 
         @Override
         public void onFailed(
@@ -166,19 +179,18 @@ public class PlayBackClass {
           }
         }
 
-        @Override
-        public void onShowRateAndTime(
-          PlayerAttribute attribute,
-          boolean isShowTime,
-          String time,
-          long rate
-        ) {}
+        //        public void onShowRateAndTime(
+        //          PlayerAttribute attribute,
+        //          boolean isShowTime,
+        //          String time,
+        //          long rate
+        //        ) {}
 
         public void onShowRateAndTime(
           PlayerAttribute attribute,
           boolean isShowTime,
           String time,
-          String rate
+          long rate
         ) {
           if (eventSink != null) {
             Map<String, Object> jsonData = new HashMap<>();
@@ -210,22 +222,26 @@ public class PlayBackClass {
         }
 
         public void onVideoBufferEnd(PlayerAttribute attribute, MsgContent ex) {
+          System.out.println("onVideoBufferEnd");
+
           if (isStartPlaybackCalled) {
             isStartPlaybackCalled = false;
             resultCallback.onSuccess(new ArrayList<>());
           }
         }
 
-        public void onPlayStateClick(View view) {}
+        public void onPlayStateClick(View view) {
+          System.out.println("onPlayStateClick");
+        }
       }
     );
   }
 
   public static void seekToTime(int times) {
     Calendar searchTime = Calendar.getInstance();
-    searchTime.set(Calendar.DAY_OF_MONTH, Integer.valueOf(date));
-    searchTime.set(Calendar.MONTH, Integer.valueOf(month) - 1);
-    searchTime.set(Calendar.YEAR, Integer.valueOf(year));
+    searchTime.set(Calendar.DAY_OF_MONTH, Integer.valueOf(fromDate));
+    searchTime.set(Calendar.MONTH, Integer.valueOf(fromMonth) - 1);
+    searchTime.set(Calendar.YEAR, Integer.valueOf(fromYear));
     searchTime.set(Calendar.HOUR_OF_DAY, 0);
     searchTime.set(Calendar.MINUTE, 0);
     searchTime.set(Calendar.SECOND, 0);
@@ -319,17 +335,17 @@ public class PlayBackClass {
   public void searchRecordByFile() {
     if (recordManager instanceof DevRecordManager) {
       Calendar searchTime = Calendar.getInstance();
-      searchTime.set(Calendar.DAY_OF_MONTH, Integer.valueOf(date));
-      searchTime.set(Calendar.MONTH, Integer.valueOf(month) - 1);
-      searchTime.set(Calendar.YEAR, Integer.valueOf(year));
+      searchTime.set(Calendar.DAY_OF_MONTH, Integer.valueOf(fromDate));
+      searchTime.set(Calendar.MONTH, Integer.valueOf(fromMonth) - 1);
+      searchTime.set(Calendar.YEAR, Integer.valueOf(fromYear));
       searchTime.set(Calendar.HOUR_OF_DAY, 0);
       searchTime.set(Calendar.MINUTE, 0);
       searchTime.set(Calendar.SECOND, 0);
 
       Calendar endTime = Calendar.getInstance();
-      endTime.set(Calendar.DAY_OF_MONTH, Integer.valueOf(date));
-      endTime.set(Calendar.MONTH, Integer.valueOf(month) - 1);
-      endTime.set(Calendar.YEAR, Integer.valueOf(year));
+      endTime.set(Calendar.DAY_OF_MONTH, Integer.valueOf(toDate));
+      endTime.set(Calendar.MONTH, Integer.valueOf(toMonth) - 1);
+      endTime.set(Calendar.YEAR, Integer.valueOf(toYear));
       endTime.set(Calendar.HOUR_OF_DAY, 23);
       endTime.set(Calendar.MINUTE, 59);
       endTime.set(Calendar.SECOND, 59);

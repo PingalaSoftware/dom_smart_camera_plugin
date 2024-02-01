@@ -88,9 +88,14 @@ abstract class DomCameraPlatform extends PlatformInterface {
   }
 
   Future<Map<String, dynamic>> playbackList(
-      String date, String month, String year) {
-    throw UnimplementedError(
-        'playbackList(String date, String month, String year) has not been implemented.');
+    String fromDate,
+    String fromMonth,
+    String fromYear,
+    String toDate,
+    String toMonth,
+    String toYear,
+  ) {
+    throw UnimplementedError('playbackList() has not been implemented.');
   }
 
   Future<Map<String, dynamic>> playFromPosition(int position) {

@@ -18,7 +18,7 @@ class _TimeRangeSeekBarState extends State<TimeRangeSeekBar> {
   late StreamSubscription<dynamic> subscription;
 
   String time = "";
-  String rate = "";
+  int rate = 0;
 
   @override
   void initState() {

@@ -869,7 +869,13 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Future<Map<String, dynamic>> playbackList(
-      String date, String month, String year) async {
+    String fromDate,
+    String fromMonth,
+    String fromYear,
+    String toDate,
+    String toMonth,
+    String toYear,
+  ) async {
     if (isRequestPending) {
       return {
         "isError": true,
@@ -879,8 +885,8 @@ class MethodChannelDomCamera extends DomCameraPlatform {
     }
     try {
       DateTime currentDate = DateTime.now();
-      DateTime pickedDate =
-          DateTime(int.parse(year), int.parse(month), int.parse(date));
+      DateTime pickedDate = DateTime(
+          int.parse(fromYear), int.parse(fromMonth), int.parse(fromDate));
 
       if (pickedDate.isAfter(currentDate)) {
         return {
@@ -896,9 +902,12 @@ class MethodChannelDomCamera extends DomCameraPlatform {
       isRequestPending = true;
       List dataList = await methodChannel.invokeMethod('PLAYBACK_LIST', {
         "cameraId": initializedCamera,
-        "date": date,
-        "month": month,
-        "year": year
+        "fromDate": fromDate,
+        "fromMonth": fromMonth,
+        "fromYear": fromYear,
+        "toDate": toDate,
+        "toMonth": toMonth,
+        "toYear": toYear,
       });
       isRequestPending = false;
 

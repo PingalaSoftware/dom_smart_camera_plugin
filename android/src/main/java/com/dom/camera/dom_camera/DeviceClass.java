@@ -257,7 +257,6 @@ public class DeviceClass {
     );
 
     if (type.equals("HUMAN_DETECT")) {
-      System.out.println("get config called with: ALARM_PIR" + type);
       devConfigInfo.setJsonName(JsonConfig.DETECT_HUMAN_DETECTION);
       devConfigInfo.setChnId(0);
       devConfigManager.getDevConfig(devConfigInfo);
@@ -266,33 +265,26 @@ public class DeviceClass {
       devConfigInfo.setChnId(0);
       devConfigManager.getDevConfig(devConfigInfo);
     } else if (type.equals("SIMPLIFY_ENCODE")) {
-      System.out.println("get config called with: ALARM_PIR" + type);
       devConfigInfo.setJsonName(JsonConfig.SIMPLIFY_ENCODE);
       devConfigInfo.setChnId(-1);
       devConfigManager.getDevConfig(devConfigInfo);
     } else if (type.equals("STORAGE_INFO")) {
-      System.out.println("get config called with: STORAGE_INFO" + type);
       devConfigInfo.setJsonName(JsonConfig.STORAGE_INFO);
       devConfigInfo.setChnId(-1);
       devConfigManager.getDevConfig(devConfigInfo);
     } else if (type.equals("CAMERA_PARAM")) {
-      System.out.println("get config called with: CAMERA_PARAM" + type);
       devConfigInfo.setJsonName(JsonConfig.CAMERA_PARAM);
       devConfigInfo.setChnId(-1);
       devConfigManager.getDevConfig(devConfigInfo);
     } else if (type.equals("VIDEO_CONFIG")) {
-      System.out.println("get config called with: VIDEO_CONFIG" + type);
       devConfigInfo.setJsonName(JsonConfig.RECORD);
       devConfigInfo.setChnId(-1);
       devConfigManager.getDevConfig(devConfigInfo);
     } else if (type.equals("SYSTEM_INFO")) {
-      System.out.println("get config called with: SYSTEM_INFO" + type);
       devConfigInfo.setJsonName(JsonConfig.SYSTEM_INFO);
       devConfigInfo.setChnId(1);
       devConfigManager.getDevConfig(devConfigInfo);
     } else {
-      System.out.println("get config called FAILED:++++" + type + "+++++");
-
       resultCb.onFailed("0", "Invalid config type");
     }
   }
@@ -324,14 +316,12 @@ public class DeviceClass {
     );
 
     if (type.equals("HUMAN_DETECT")) {
-      System.out.println("get config called with: ALARM_PIR" + type);
       devConfigInfo.setJsonName(JsonConfig.DETECT_HUMAN_DETECTION);
       devConfigInfo.setChnId(0);
       devConfigInfo.setJsonData(newData);
       devConfigManager.setDevConfig(devConfigInfo);
     }
     if (type.equals("MOVE_DETECT")) {
-      System.out.println("get config called with: ALARM_PIR" + type);
       devConfigInfo.setJsonName(JsonConfig.DETECT_MOTIONDETECT);
       devConfigInfo.setChnId(0);
       devConfigInfo.setJsonData(newData);
@@ -656,85 +646,82 @@ public class DeviceClass {
     monitorManager.startTalkByDoubleDirection(context, true);
   }
 
-//  @Override
-//  public void onReport(String devId, String stateType, String stateData) {
-//    if (!StringUtils.isStringNULL(stateData)) {
-//      com.alibaba.fastjson.JSONObject jsonObject = JSON.parseObject(stateData);
-//      if (jsonObject.containsKey("Dev.ElectCapacity")) {
-//        ElectCapacityBean electCapacityBean = jsonObject.getObject("Dev.ElectCapacity", ElectCapacityBean.class);
-////        if (iDevMonitorView != null) {
-////          iDevMonitorView.onElectCapacityResult(electCapacityBean);
-////        }
-//      }
-//    }
-//  }
-
   public static void stopIntercom() {
     if (monitorManager == null) return;
 
     monitorManager.destroyTalk();
   }
 
-  static void getBatteryPercentage(String cameraId, myDomResultInterface resultCb) {
-    DevReportManager devReportManager = new DevReportManager(null, SDKCONST.UploadDataType.SDK_ELECT_STATE, new DevReportManager.OnDevReportListener() {
-      @Override
-      public void onReport(String devId, String stateType, String stateData) {
-        ArrayList dataList = new ArrayList<>();
-        dataList.add(stateData);
-        resultCb.onSuccess(dataList);
+  static void getBatteryPercentage(
+    String cameraId,
+    myDomResultInterface resultCb
+  ) {
+    DevReportManager devReportManager = new DevReportManager(
+      null,
+      SDKCONST.UploadDataType.SDK_ELECT_STATE,
+      new DevReportManager.OnDevReportListener() {
+        public void onReport(String devId, String stateType, String stateData) {
+          ArrayList dataList = new ArrayList<>();
+          dataList.add(stateData);
+          resultCb.onSuccess(dataList);
+        }
       }
-    });
+    );
 
     devReportManager.startReceive(cameraId);
   }
 
-    static void getDevWiFiSignalLevel(String cameraId, myDomResultInterface resultCb) {
-            DevConfigManager devConfigManager = DeviceManager
-          .getInstance()
-          .getDevConfigManager(cameraId);
-        DevConfigInfo devConfigInfo = DevConfigInfo.create(new DeviceManager.OnDevManagerListener<String>() {
-          @Override
-          public void onSuccess(String s, int i, String jsonData) {
-            if (jsonData != null) {
-              HandleConfigData<WifiRouteInfo> handleConfigData = new HandleConfigData<>();
-              if (handleConfigData.getDataObj(jsonData, WifiRouteInfo.class)) {
-                WifiRouteInfo wifiRouteInfo = handleConfigData.getObj();
+  static void getDevWiFiSignalLevel(
+    String cameraId,
+    myDomResultInterface resultCb
+  ) {
+    DevConfigManager devConfigManager = DeviceManager
+      .getInstance()
+      .getDevConfigManager(cameraId);
+    DevConfigInfo devConfigInfo = DevConfigInfo.create(
+      new DeviceManager.OnDevManagerListener<String>() {
+        @Override
+        public void onSuccess(String s, int i, String jsonData) {
+          if (jsonData != null) {
+            HandleConfigData<WifiRouteInfo> handleConfigData = new HandleConfigData<>();
+            if (handleConfigData.getDataObj(jsonData, WifiRouteInfo.class)) {
+              WifiRouteInfo wifiRouteInfo = handleConfigData.getObj();
 
-                boolean wlanStatus = wifiRouteInfo.isWlanStatus();
-                boolean eth0Status = wifiRouteInfo.isEth0Status();
-                String wlanMac = wifiRouteInfo.getWlanMac();
-                int signalLevel = wifiRouteInfo.getSignalLevel();
+              boolean wlanStatus = wifiRouteInfo.isWlanStatus();
+              boolean eth0Status = wifiRouteInfo.isEth0Status();
+              String wlanMac = wifiRouteInfo.getWlanMac();
+              int signalLevel = wifiRouteInfo.getSignalLevel();
 
-                JSONObject jsonObject = new JSONObject();
-                try {
-                  jsonObject.put("wlanStatus", wlanStatus);
-                  jsonObject.put("eth0Status", eth0Status);
-                  jsonObject.put("wlanMac", wlanMac);
-                  jsonObject.put("signalLevel", signalLevel);
+              JSONObject jsonObject = new JSONObject();
+              try {
+                jsonObject.put("wlanStatus", wlanStatus);
+                jsonObject.put("eth0Status", eth0Status);
+                jsonObject.put("wlanMac", wlanMac);
+                jsonObject.put("signalLevel", signalLevel);
 
-                  ArrayList dataList = new ArrayList<>();
-                  dataList.add(jsonObject.toString(jsonObject.length()));
-                  resultCb.onSuccess(dataList);
-                } catch (JSONException e) {
-                  ArrayList dataList = new ArrayList<>();
-                  dataList.add(null);
-                  dataList.add(signalLevel);
-                  resultCb.onSuccess(dataList);
-                }
+                ArrayList dataList = new ArrayList<>();
+                dataList.add(jsonObject.toString(jsonObject.length()));
+                resultCb.onSuccess(dataList);
+              } catch (JSONException e) {
+                ArrayList dataList = new ArrayList<>();
+                dataList.add(null);
+                dataList.add(signalLevel);
+                resultCb.onSuccess(dataList);
               }
             }
           }
-          public void onFailed(String s, int i, String s1, int i1) {
-            System.out.println("f: wifiRouteInfo: "+ s + " error id: " + i1);
-            resultCb.onFailed("0"+ i1, s1);
-          }
-        });
+        }
 
+        public void onFailed(String s, int i, String s1, int i1) {
+          resultCb.onFailed("0" + i1, s1);
+        }
+      }
+    );
 
-        devConfigInfo.setCmdId(1020);
-        devConfigInfo.setJsonName(JsonConfig.WIFI_ROUTE_INFO);
-        devConfigInfo.setChnId(1);
-        devConfigManager.setDevCmd(devConfigInfo);
+    devConfigInfo.setCmdId(1020);
+    devConfigInfo.setJsonName(JsonConfig.WIFI_ROUTE_INFO);
+    devConfigInfo.setChnId(1);
+    devConfigManager.setDevCmd(devConfigInfo);
   }
 
   public int changeStream(int chnId, String cameraId) {

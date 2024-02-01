@@ -1,4 +1,5 @@
 import 'package:dom_camera/dom_camera.dart';
+import 'package:dom_camera_example/components/button.dart';
 import 'package:dom_camera_example/scenes/camera/monitor/options/playback_time_widget.dart';
 import 'package:dom_camera_example/scenes/camera/monitor/playback/time_range_seekbar.dart';
 import 'package:dom_camera_example/widgets/custom_app_bar.dart';
@@ -16,7 +17,8 @@ class VideoPlayback extends StatefulWidget {
 
 class _VideoPlaybackState extends State<VideoPlayback> {
   final _domCameraPlugin = DomCamera();
-  DateTime selectedDate = DateTime.now();
+  DateTime selectedDateFrom = DateTime.now();
+  DateTime selectedDateTo = DateTime.now();
 
   late String cameraId;
   List<List<String>> dataList = [];
@@ -36,15 +38,28 @@ class _VideoPlaybackState extends State<VideoPlayback> {
 
     cameraId = widget.cameraId;
 
-    String formattedDate = DateFormat('dd').format(selectedDate);
-    String formattedMonth = DateFormat('MM').format(selectedDate);
-    String formattedYear = DateFormat('yyyy').format(selectedDate);
+    String formattedDateFrom = DateFormat('dd').format(selectedDateFrom);
+    String formattedMonthFrom = DateFormat('MM').format(selectedDateFrom);
+    String formattedYearFrom = DateFormat('yyyy').format(selectedDateFrom);
 
-    getPlayBackList(formattedDate, formattedMonth, formattedYear);
+    String formattedDateTo = DateFormat('dd').format(selectedDateTo);
+    String formattedMonthTo = DateFormat('MM').format(selectedDateTo);
+    String formattedYearTo = DateFormat('yyyy').format(selectedDateTo);
+
+    getPlayBackList(
+      formattedDateFrom,
+      formattedMonthFrom,
+      formattedYearFrom,
+      formattedDateTo,
+      formattedMonthTo,
+      formattedYearTo,
+    );
   }
 
-  getPlayBackList(String date, String month, String year) async {
-    final result = await _domCameraPlugin.playbackList(date, month, year);
+  getPlayBackList(String dateFrom, String monthFrom, String yearFrom,
+      String dateTo, String monthTo, String yearTo) async {
+    final result = await _domCameraPlugin.playbackList(
+        dateFrom, monthFrom, yearFrom, dateTo, monthTo, yearTo);
 
     if (result["isError"]) {
       if (context.mounted) {
@@ -79,24 +94,45 @@ class _VideoPlaybackState extends State<VideoPlayback> {
     }
   }
 
-  Future<void> _selectDate(BuildContext context) async {
+  Future<void> _selectDateFrom(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: selectedDate,
+      initialDate: selectedDateFrom,
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
     );
-    if (picked != null && picked != selectedDate) {
+    if (picked != null && picked != selectedDateFrom) {
       setState(() {
-        selectedDate = picked;
+        selectedDateFrom = picked;
       });
-
-      String formattedDate = DateFormat('dd').format(picked);
-      String formattedMonth = DateFormat('MM').format(picked);
-      String formattedYear = DateFormat('yyyy').format(picked);
-
-      getPlayBackList(formattedDate, formattedMonth, formattedYear);
     }
+  }
+
+  Future<void> _selectDateTo(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDateTo,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != selectedDateTo) {
+      setState(() {
+        selectedDateFrom = picked;
+      });
+    }
+  }
+
+  void getListBasedOnDate() async {
+    String formattedDateFrom = DateFormat('dd').format(selectedDateFrom);
+    String formattedMonthFrom = DateFormat('MM').format(selectedDateFrom);
+    String formattedYearFrom = DateFormat('yyyy').format(selectedDateFrom);
+
+    String formattedDateTo = DateFormat('dd').format(selectedDateTo);
+    String formattedMonthTo = DateFormat('MM').format(selectedDateTo);
+    String formattedYearTo = DateFormat('yyyy').format(selectedDateTo);
+
+    getPlayBackList(formattedDateFrom, formattedMonthFrom, formattedYearFrom,
+        formattedDateTo, formattedMonthTo, formattedYearTo);
   }
 
   Duration calculateTimeDifference(String startTime, String endTime) {
@@ -174,7 +210,9 @@ class _VideoPlaybackState extends State<VideoPlayback> {
 
   @override
   Widget build(BuildContext context) {
-    String formattedDate = DateFormat('dd-MM-yyyy').format(selectedDate);
+    String formattedDateFrom =
+        DateFormat('dd-MM-yyyy').format(selectedDateFrom);
+    String formattedDateTo = DateFormat('dd-MM-yyyy').format(selectedDateTo);
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -193,7 +231,6 @@ class _VideoPlaybackState extends State<VideoPlayback> {
             const SizedBox(height: 20),
             const TimeRangeSeekBar(),
             const SizedBox(height: 10),
-            if (isPlaying) Text("$startTime -- $endTime"),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Row(
@@ -260,25 +297,55 @@ class _VideoPlaybackState extends State<VideoPlayback> {
               ),
             ),
             const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Text(
-                  formattedDate,
-                  style: const TextStyle(
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Theme.of(context).primaryColor),
+                borderRadius: BorderRadius.circular(3),
+              ),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10),
+              child: Column(
+                children: [
+                  const Text("Select from and to date"),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        InkWell(
+                          onTap: () => _selectDateFrom(context),
+                          child: Text(
+                            formattedDateFrom,
+                            style: const TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const Text("  -  "),
+                        InkWell(
+                          onTap: () => _selectDateTo(context),
+                          child: Text(
+                            formattedDateTo,
+                            style: const TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        InkWell(
+                          onTap: () => getListBasedOnDate(),
+                          child: const OptionsButton(
+                            text: "Go",
+                            size: 50,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                InkWell(
-                  onTap: () => _selectDate(context),
-                  child: const Icon(
-                    Icons.calendar_today,
-                    size: 30.0,
-                    color: Colors.blue,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(height: 10),
             isListLoading
