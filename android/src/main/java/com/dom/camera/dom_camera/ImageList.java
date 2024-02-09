@@ -34,7 +34,7 @@ public class ImageList {
             new ArrayList<>(Collections.singleton(data.toString()))
           );
         } else {
-          result.onFailed("", "");
+          result.onFailed("0", "Filed to get the Images");
         }
       });
     SearchPictureByFiles();
@@ -63,7 +63,7 @@ public class ImageList {
     DeviceClass.myDomResultInterface result
   ) {
     if (ImageList == null || position >= ImageList.size()) {
-      result.onFailed("0", "0");
+      result.onFailed("0", "Invalid Position");
       return;
     }
 

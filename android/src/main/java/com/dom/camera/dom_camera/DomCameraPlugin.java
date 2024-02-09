@@ -25,7 +25,9 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import org.json.JSONObject;
 
 public class DomCameraPlugin
   implements FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler {
@@ -40,9 +42,25 @@ public class DomCameraPlugin
   String ssid;
   int position;
 
+  private HashMap<String, Result> methodResults = new HashMap<>();
+
   private ViewGroup viewCameraActivity;
   private ViewGroup playBackView;
   private EventSink eventSink;
+
+  private void storeResult(String methodName, @NonNull Result result) {
+    methodResults.put(methodName, result);
+  }
+
+  private Result getResultAndClear(String methodName) {
+    Result result = methodResults.get(methodName);
+    methodResults.remove(methodName);
+    return result;
+  }
+
+  private boolean isResultAvailable(String methodName) {
+    return methodResults.containsKey(methodName);
+  }
 
   @Override
   public void onAttachedToEngine(
@@ -105,6 +123,12 @@ public class DomCameraPlugin
 
     switch (methodName) {
       case LOGIN:
+        if (isResultAvailable("LOGIN")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("LOGIN", result);
+
         userName = call.argument("userName");
         password = call.argument("password");
 
@@ -116,11 +140,17 @@ public class DomCameraPlugin
               List<Object> list = new ArrayList<>();
               list.add(true);
               list.add(i);
-              result.success(list);
+              if (isResultAvailable("LOGIN")) {
+                Result tempResult = getResultAndClear("LOGIN");
+                tempResult.success(list);
+              }
             }
 
             public void onFailed(int i, int errorId) {
-              result.error("0", "Failed", errorId);
+              if (isResultAvailable("LOGIN")) {
+                Result tempResult = getResultAndClear("LOGIN");
+                tempResult.error("0", "Failed", errorId);
+              }
             }
 
             @Override
@@ -132,19 +162,36 @@ public class DomCameraPlugin
         );
         break;
       case GET_USER_INFO:
+        if (isResultAvailable("GET_USER_INFO")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("GET_USER_INFO", result);
         UserClass.getUserInfo(
           new DeviceClass.myDomResultInterface() {
             public void onSuccess(List<String> dataList) {
-              result.success(dataList);
+              if (isResultAvailable("GET_USER_INFO")) {
+                Result tempResult = getResultAndClear("GET_USER_INFO");
+                tempResult.success(dataList);
+              }
             }
 
             public void onFailed(String errorId, String message) {
-              result.error(errorId, message, null);
+              if (isResultAvailable("GET_USER_INFO")) {
+                Result tempResult = getResultAndClear("GET_USER_INFO");
+                tempResult.error(errorId, message, null);
+              }
             }
           }
         );
         break;
       case ADD_CAMERA_THROUGH_SERIAL_NUMBER:
+        if (isResultAvailable("ADD_CAMERA_THROUGH_SERIAL_NUMBER")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("ADD_CAMERA_THROUGH_SERIAL_NUMBER", result);
+
         cameraId = call.argument("cameraId");
         String cameraType = call.argument("cameraType");
 
@@ -153,16 +200,32 @@ public class DomCameraPlugin
           cameraType,
           new DeviceClass.myDomResultInterface() {
             public void onSuccess(List<String> dataList) {
-              result.success(dataList);
+              if (isResultAvailable("ADD_CAMERA_THROUGH_SERIAL_NUMBER")) {
+                Result tempResult = getResultAndClear(
+                  "ADD_CAMERA_THROUGH_SERIAL_NUMBER"
+                );
+                tempResult.success(dataList);
+              }
             }
 
             public void onFailed(String errorId, String message) {
-              result.error(errorId, message, null);
+              if (isResultAvailable("ADD_CAMERA_THROUGH_SERIAL_NUMBER")) {
+                Result tempResult = getResultAndClear(
+                  "ADD_CAMERA_THROUGH_SERIAL_NUMBER"
+                );
+                tempResult.error(errorId, message, null);
+              }
             }
           }
         );
         break;
       case ADD_CAMERA_THROUGH_WIFI:
+        if (isResultAvailable("ADD_CAMERA_THROUGH_WIFI")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("ADD_CAMERA_THROUGH_WIFI", result);
+
         ssid = call.argument("ssid");
         password = call.argument("password");
 
@@ -171,37 +234,64 @@ public class DomCameraPlugin
           password,
           this.applicationContext,
           new DeviceClass.myDomResultInterface() {
-            public void onFailed(String errorId, String message) {
-              result.error(errorId, message, null);
+            public void onSuccess(List dataList) {
+              if (isResultAvailable("ADD_CAMERA_THROUGH_WIFI")) {
+                Result tempResult = getResultAndClear(
+                  "ADD_CAMERA_THROUGH_WIFI"
+                );
+                tempResult.success(dataList);
+              }
             }
 
-            public void onSuccess(List dataList) {
-              result.success(dataList);
+            public void onFailed(String errorId, String message) {
+              if (isResultAvailable("ADD_CAMERA_THROUGH_WIFI")) {
+                Result tempResult = getResultAndClear(
+                  "ADD_CAMERA_THROUGH_WIFI"
+                );
+                tempResult.error(errorId, message, null);
+              }
             }
           }
         );
         break;
       case GET_CAMERA_STATE:
         cameraId = call.argument("cameraId");
+        if (isResultAvailable("GET_CAMERA_STATE" + cameraId)) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("GET_CAMERA_STATE" + cameraId, result);
 
         DeviceClass.cameraLoginState(
           cameraId,
           new DeviceClass.myDomResultInterface() {
             public void onSuccess(List<String> dataList) {
-              result.success(dataList);
+              if (isResultAvailable("GET_CAMERA_STATE" + cameraId)) {
+                Result tempResult = getResultAndClear(
+                  "GET_CAMERA_STATE" + cameraId
+                );
+                tempResult.success(dataList);
+              }
             }
 
             public void onFailed(String errorId, String message) {
-              result.error(
-                errorId,
-                "Please check the device connection",
-                "" + message
-              );
+              if (isResultAvailable("GET_CAMERA_STATE" + cameraId)) {
+                Result tempResult = getResultAndClear(
+                  "GET_CAMERA_STATE" + cameraId
+                );
+                tempResult.error(errorId, message, null);
+              }
             }
           }
         );
         break;
       case CAMERA_LOGIN:
+        if (isResultAvailable("CAMERA_LOGIN")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("CAMERA_LOGIN", result);
+
         cameraId = call.argument("cameraId");
 
         DeviceClass.cameraLogin(
@@ -225,7 +315,10 @@ public class DomCameraPlugin
                   }
                 }
               );
-              result.success(list);
+              if (isResultAvailable("CAMERA_LOGIN")) {
+                Result tempResult = getResultAndClear("CAMERA_LOGIN");
+                tempResult.success(list);
+              }
             }
 
             public void onFailed(
@@ -235,13 +328,19 @@ public class DomCameraPlugin
               int i1
             ) {
               if (devId == "0" && msgId == 0 && jsonName == "0" && i1 == 0) {
-                result.error(
-                  "0",
-                  "Please reset the camera and try again",
-                  cameraId
-                );
+                if (isResultAvailable("CAMERA_LOGIN")) {
+                  Result tempResult = getResultAndClear("CAMERA_LOGIN");
+                  tempResult.error(
+                    "0",
+                    "Please reset the camera and try again",
+                    null
+                  );
+                }
               } else {
-                result.error("0", "Camera/Device is Offline", cameraId);
+                if (isResultAvailable("CAMERA_LOGIN")) {
+                  Result tempResult = getResultAndClear("CAMERA_LOGIN");
+                  tempResult.error("0", "Camera/Device is Offline", null);
+                }
               }
             }
           }
@@ -249,24 +348,42 @@ public class DomCameraPlugin
         break;
       case GET_CAMERA_NAME:
         cameraId = call.argument("cameraId");
+        if (isResultAvailable("GET_CAMERA_NAME" + cameraId)) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("GET_CAMERA_NAME" + cameraId, result);
+
         DeviceClass.getCameraName(
           cameraId,
           new DeviceClass.myDomResultInterface() {
             public void onSuccess(List<String> dataList) {
-              result.success(dataList);
+              if (isResultAvailable("GET_CAMERA_NAME" + cameraId)) {
+                Result tempResult = getResultAndClear(
+                  "GET_CAMERA_NAME" + cameraId
+                );
+                tempResult.success(dataList);
+              }
             }
 
             public void onFailed(String errorId, String message) {
-              result.error(
-                errorId,
-                message,
-                "Please check the device connection"
-              );
+              if (isResultAvailable("GET_CAMERA_NAME" + cameraId)) {
+                Result tempResult = getResultAndClear(
+                  "GET_CAMERA_NAME" + cameraId
+                );
+                tempResult.error(errorId, message, null);
+              }
             }
           }
         );
         break;
       case ADD_PRESET:
+        if (isResultAvailable("ADD_PRESET")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("ADD_PRESET", result);
+
         cameraId = call.argument("cameraId");
         int presetId = call.argument("presetId");
         int chnId = call.argument("chnNo");
@@ -276,20 +393,28 @@ public class DomCameraPlugin
           chnId,
           new DeviceClass.myDomResultInterface() {
             public void onSuccess(List<String> dataList) {
-              result.success(dataList);
+              if (isResultAvailable("ADD_PRESET")) {
+                Result tempResult = getResultAndClear("ADD_PRESET");
+                tempResult.success(dataList);
+              }
             }
 
             public void onFailed(String errorId, String message) {
-              result.error(
-                errorId,
-                message,
-                "Please check the device connection"
-              );
+              if (isResultAvailable("ADD_PRESET")) {
+                Result tempResult = getResultAndClear("ADD_PRESET");
+                tempResult.error(errorId, message, null);
+              }
             }
           }
         );
         break;
       case TURN_TO_PRESET:
+        if (isResultAvailable("TURN_TO_PRESET")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("TURN_TO_PRESET", result);
+
         cameraId = call.argument("cameraId");
         int turnToPresetId = call.argument("presetId");
         int chnNo = call.argument("chnNo");
@@ -300,20 +425,28 @@ public class DomCameraPlugin
           chnNo,
           new DeviceClass.myDomResultInterface() {
             public void onSuccess(List<String> dataList) {
-              result.success(dataList);
+              if (isResultAvailable("TURN_TO_PRESET")) {
+                Result tempResult = getResultAndClear("TURN_TO_PRESET");
+                tempResult.success(dataList);
+              }
             }
 
             public void onFailed(String errorId, String message) {
-              result.error(
-                errorId,
-                message,
-                "Please check the device connection"
-              );
+              if (isResultAvailable("TURN_TO_PRESET")) {
+                Result tempResult = getResultAndClear("TURN_TO_PRESET");
+                tempResult.error(errorId, message, null);
+              }
             }
           }
         );
         break;
       case SET_CAMERA_NAME:
+        if (isResultAvailable("SET_CAMERA_NAME")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("SET_CAMERA_NAME", result);
+
         cameraId = call.argument("cameraId");
         String newName = call.argument("newName");
         DeviceClass.setCameraName(
@@ -321,15 +454,17 @@ public class DomCameraPlugin
           newName,
           new DeviceClass.myDomResultInterface() {
             public void onSuccess(List<String> dataList) {
-              result.success(dataList);
+              if (isResultAvailable("SET_CAMERA_NAME")) {
+                Result tempResult = getResultAndClear("SET_CAMERA_NAME");
+                tempResult.success(dataList);
+              }
             }
 
             public void onFailed(String errorId, String message) {
-              result.error(
-                errorId,
-                message,
-                "Please check the device connection"
-              );
+              if (isResultAvailable("SET_CAMERA_NAME")) {
+                Result tempResult = getResultAndClear("SET_CAMERA_NAME");
+                tempResult.error(errorId, message, null);
+              }
             }
           }
         );
@@ -337,7 +472,72 @@ public class DomCameraPlugin
       case STOP_STREAM:
         DeviceClass.stopStream();
         break;
+      case IS_FULL_SCREEN_STREAMING:
+        if (isResultAvailable("IS_FULL_SCREEN_STREAMING")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("IS_FULL_SCREEN_STREAMING", result);
+
+        DeviceClass.isFullScreenStreaming(
+          new DeviceClass.myDomResultInterface() {
+            public void onSuccess(List<String> dataList) {
+              if (isResultAvailable("IS_FULL_SCREEN_STREAMING")) {
+                Result tempResult = getResultAndClear(
+                  "IS_FULL_SCREEN_STREAMING"
+                );
+                tempResult.success(dataList);
+              }
+            }
+
+            public void onFailed(String errorId, String message) {
+              if (isResultAvailable("IS_FULL_SCREEN_STREAMING")) {
+                Result tempResult = getResultAndClear(
+                  "IS_FULL_SCREEN_STREAMING"
+                );
+                tempResult.error(errorId, message, null);
+              }
+            }
+          }
+        );
+        break;
+      case SHOW_FULL_SCREEN:
+        if (isResultAvailable("SHOW_FULL_SCREEN")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("SHOW_FULL_SCREEN", result);
+
+        System.out.println("SHOW_FULL_SCREEN called");
+        boolean isFullScreen = call.argument("isFullScreen");
+        System.out.println("SHOW_FULL_SCREEN called: " + isFullScreen);
+
+        DeviceClass.setVideoFullScreen(
+          isFullScreen,
+          new DeviceClass.myDomResultInterface() {
+            public void onSuccess(List<String> dataList) {
+              if (isResultAvailable("SHOW_FULL_SCREEN")) {
+                Result tempResult = getResultAndClear("SHOW_FULL_SCREEN");
+                tempResult.success(dataList);
+              }
+            }
+
+            public void onFailed(String errorId, String message) {
+              if (isResultAvailable("SHOW_FULL_SCREEN")) {
+                Result tempResult = getResultAndClear("SHOW_FULL_SCREEN");
+                tempResult.error(errorId, message, null);
+              }
+            }
+          }
+        );
+        break;
       case LIVE_STREAM:
+        if (isResultAvailable("LIVE_STREAM")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("LIVE_STREAM", result);
+
         cameraId = call.argument("cameraId");
         DeviceClass.liveStream(
           this.applicationContext,
@@ -346,21 +546,29 @@ public class DomCameraPlugin
           new DeviceClass.myDomResultInterface() {
             @Override
             public void onSuccess(List<String> dataList) {
-              result.success(dataList);
+              if (isResultAvailable("LIVE_STREAM")) {
+                Result tempResult = getResultAndClear("LIVE_STREAM");
+                tempResult.success(dataList);
+              }
             }
 
             @Override
             public void onFailed(String errorId, String message) {
-              result.error(
-                errorId,
-                "Please check the device connection",
-                "" + message
-              );
+              if (isResultAvailable("LIVE_STREAM")) {
+                Result tempResult = getResultAndClear("LIVE_STREAM");
+                tempResult.error(errorId, message, null);
+              }
             }
           }
         );
         break;
       case SET_RECORD_TYPE:
+        if (isResultAvailable("SET_RECORD_TYPE")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("SET_RECORD_TYPE", result);
+
         cameraId = call.argument("cameraId");
         String type = call.argument("type");
         DeviceClass.setRecordType(
@@ -368,20 +576,28 @@ public class DomCameraPlugin
           type,
           new DeviceClass.myDomResultInterface() {
             public void onSuccess(List<String> dataList) {
-              result.success(dataList);
+              if (isResultAvailable("SET_RECORD_TYPE")) {
+                Result tempResult = getResultAndClear("SET_RECORD_TYPE");
+                tempResult.success(dataList);
+              }
             }
 
             public void onFailed(String errorId, String message) {
-              result.error(
-                errorId,
-                message,
-                "Please check the device connection"
-              );
+              if (isResultAvailable("SET_RECORD_TYPE")) {
+                Result tempResult = getResultAndClear("SET_RECORD_TYPE");
+                tempResult.error(errorId, message, null);
+              }
             }
           }
         );
         break;
       case GET_CONFIG:
+        if (isResultAvailable("GET_CONFIG")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("GET_CONFIG", result);
+
         cameraId = call.argument("cameraId");
         String getType = call.argument("type");
         DeviceClass.getConfig(
@@ -389,20 +605,28 @@ public class DomCameraPlugin
           getType,
           new DeviceClass.myDomResultInterface() {
             public void onSuccess(List<String> dataList) {
-              result.success(dataList);
+              if (isResultAvailable("GET_CONFIG")) {
+                Result tempResult = getResultAndClear("GET_CONFIG");
+                tempResult.success(dataList);
+              }
             }
 
             public void onFailed(String errorId, String message) {
-              result.error(
-                errorId,
-                message,
-                "Please check the device connection"
-              );
+              if (isResultAvailable("GET_CONFIG")) {
+                Result tempResult = getResultAndClear("GET_CONFIG");
+                tempResult.error(errorId, message, null);
+              }
             }
           }
         );
         break;
       case SET_CONFIG:
+        if (isResultAvailable("SET_CONFIG")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("SET_CONFIG", result);
+
         cameraId = call.argument("cameraId");
         String setType = call.argument("type");
         String newConfig = call.argument("newConfig");
@@ -412,60 +636,84 @@ public class DomCameraPlugin
           newConfig,
           new DeviceClass.myDomResultInterface() {
             public void onSuccess(List<String> dataList) {
-              result.success(dataList);
+              if (isResultAvailable("SET_CONFIG")) {
+                Result tempResult = getResultAndClear("SET_CONFIG");
+                tempResult.success(dataList);
+              }
             }
 
             public void onFailed(String errorId, String message) {
-              result.error(
-                errorId,
-                message,
-                "Please check the device connection"
-              );
+              if (isResultAvailable("SET_CONFIG")) {
+                Result tempResult = getResultAndClear("SET_CONFIG");
+                tempResult.error(errorId, message, null);
+              }
             }
           }
         );
         break;
       case GET_WIFI_SIGNAL:
+        if (isResultAvailable("GET_WIFI_SIGNAL")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("GET_WIFI_SIGNAL", result);
+
         cameraId = call.argument("cameraId");
 
         DeviceClass.getDevWiFiSignalLevel(
           cameraId,
           new DeviceClass.myDomResultInterface() {
             public void onSuccess(List<String> dataList) {
-              result.success(dataList);
+              if (isResultAvailable("GET_WIFI_SIGNAL")) {
+                Result tempResult = getResultAndClear("GET_WIFI_SIGNAL");
+                tempResult.success(dataList);
+              }
             }
 
             public void onFailed(String errorId, String message) {
-              result.error(
-                errorId,
-                message,
-                "Please check the device connection"
-              );
+              if (isResultAvailable("GET_WIFI_SIGNAL")) {
+                Result tempResult = getResultAndClear("GET_WIFI_SIGNAL");
+                tempResult.error(errorId, message, null);
+              }
             }
           }
         );
         break;
       case GET_BATTERY_PERCENTAGE:
+        if (isResultAvailable("GET_BATTERY_PERCENTAGE")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("GET_BATTERY_PERCENTAGE", result);
+
         cameraId = call.argument("cameraId");
 
         DeviceClass.getBatteryPercentage(
           cameraId,
           new DeviceClass.myDomResultInterface() {
             public void onSuccess(List<String> dataList) {
-              result.success(dataList);
+              if (isResultAvailable("GET_BATTERY_PERCENTAGE")) {
+                Result tempResult = getResultAndClear("GET_BATTERY_PERCENTAGE");
+                tempResult.success(dataList);
+              }
             }
 
             public void onFailed(String errorId, String message) {
-              result.error(
-                errorId,
-                message,
-                "Please check the device connection"
-              );
+              if (isResultAvailable("GET_BATTERY_PERCENTAGE")) {
+                Result tempResult = getResultAndClear("GET_BATTERY_PERCENTAGE");
+                tempResult.error(errorId, message, null);
+              }
             }
           }
         );
         break;
       case SET_HUMAN_DETECTION:
+        if (isResultAvailable("SET_HUMAN_DETECTION")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("SET_HUMAN_DETECTION", result);
+
         cameraId = call.argument("cameraId");
         boolean isEnabled = call.argument("isEnabled");
         DeviceClass.HumanDetection(
@@ -473,15 +721,18 @@ public class DomCameraPlugin
           isEnabled,
           new DeviceClass.myDomResultInterface() {
             public void onSuccess(List<String> dataList) {
+              if (isResultAvailable("SET_HUMAN_DETECTION")) {
+                Result tempResult = getResultAndClear("SET_HUMAN_DETECTION");
+                tempResult.success(dataList);
+              }
               result.success(dataList);
             }
 
             public void onFailed(String errorId, String message) {
-              result.error(
-                errorId,
-                "Please check the device connection",
-                "" + message
-              );
+              if (isResultAvailable("SET_HUMAN_DETECTION")) {
+                Result tempResult = getResultAndClear("SET_HUMAN_DETECTION");
+                tempResult.error(errorId, message, null);
+              }
             }
           }
         );
@@ -520,37 +771,67 @@ public class DomCameraPlugin
         DeviceClass.ptzControl(cameraId, cmd, isStop);
         break;
       case IMAGE_LIST:
+        if (isResultAvailable("IMAGE_LIST")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("IMAGE_LIST", result);
+
         String cameraId = call.argument("cameraId");
         new ImageList(
           cameraId,
           new DeviceClass.myDomResultInterface() {
             public void onSuccess(List<String> dataList) {
-              result.success(dataList);
+              if (isResultAvailable("IMAGE_LIST")) {
+                Result tempResult = getResultAndClear("IMAGE_LIST");
+                tempResult.success(dataList);
+              }
             }
 
             public void onFailed(String errorId, String message) {
-              result.error(errorId, "Failed to get list", "" + message);
+              if (isResultAvailable("IMAGE_LIST")) {
+                Result tempResult = getResultAndClear("IMAGE_LIST");
+                tempResult.error(errorId, message, null);
+              }
             }
           }
         );
 
         break;
       case IMAGE_SAVE_LOCAL:
+        if (isResultAvailable("IMAGE_SAVE_LOCAL")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("IMAGE_SAVE_LOCAL", result);
+
         position = call.argument("position");
         ImageList.downloadFile(
           position,
           new DeviceClass.myDomResultInterface() {
             public void onSuccess(List<String> dataList) {
-              result.success(dataList);
+              if (isResultAvailable("IMAGE_SAVE_LOCAL")) {
+                Result tempResult = getResultAndClear("IMAGE_SAVE_LOCAL");
+                tempResult.success(dataList);
+              }
             }
 
             public void onFailed(String errorId, String message) {
-              result.error(errorId, "Invalid position", "" + message);
+              if (isResultAvailable("IMAGE_SAVE_LOCAL")) {
+                Result tempResult = getResultAndClear("IMAGE_SAVE_LOCAL");
+                tempResult.error(errorId, message, null);
+              }
             }
           }
         );
         break;
       case PLAYBACK_LIST:
+        if (isResultAvailable("PLAYBACK_LIST")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("PLAYBACK_LIST", result);
+
         cameraId = call.argument("cameraId");
         String fromDate = call.argument("fromDate");
         String fromMonth = call.argument("fromMonth");
@@ -570,17 +851,29 @@ public class DomCameraPlugin
           toYear,
           new DeviceClass.myDomResultInterface() {
             public void onSuccess(List<String> dataList) {
-              result.success(dataList);
+              if (isResultAvailable("PLAYBACK_LIST")) {
+                Result tempResult = getResultAndClear("PLAYBACK_LIST");
+                tempResult.success(dataList);
+              }
             }
 
             @Override
             public void onFailed(String errorId, String message) {
-              result.error(errorId, message, "Failed to get list");
+              if (isResultAvailable("PLAYBACK_LIST")) {
+                Result tempResult = getResultAndClear("PLAYBACK_LIST");
+                tempResult.error(errorId, message, null);
+              }
             }
           }
         );
         break;
       case PLAY_FROM_POSITION:
+        if (isResultAvailable("PLAY_FROM_POSITION")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("PLAY_FROM_POSITION", result);
+
         position = call.argument("position");
         PlayBackClass.startPlayRecord(
           position,
@@ -588,21 +881,29 @@ public class DomCameraPlugin
           new DeviceClass.myDomResultInterface() {
             @Override
             public void onSuccess(List<String> dataList) {
-              result.success(dataList);
+              if (isResultAvailable("PLAY_FROM_POSITION")) {
+                Result tempResult = getResultAndClear("PLAY_FROM_POSITION");
+                tempResult.success(dataList);
+              }
             }
 
             @Override
             public void onFailed(String errorId, String message) {
-              result.error(
-                errorId,
-                "Please check the device connection",
-                "" + message
-              );
+              if (isResultAvailable("PLAY_FROM_POSITION")) {
+                Result tempResult = getResultAndClear("PLAY_FROM_POSITION");
+                tempResult.error(errorId, message, null);
+              }
             }
           }
         );
         break;
       case DOWNLOAD_FROM_POSITION:
+        if (isResultAvailable("DOWNLOAD_FROM_POSITION")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("DOWNLOAD_FROM_POSITION", result);
+
         position = call.argument("position");
         cameraId = call.argument("cameraId");
 
@@ -611,12 +912,18 @@ public class DomCameraPlugin
           cameraId,
           new DeviceClass.myDomResultInterface() {
             public void onSuccess(List<String> dataList) {
-              result.success(dataList);
+              if (isResultAvailable("DOWNLOAD_FROM_POSITION")) {
+                Result tempResult = getResultAndClear("DOWNLOAD_FROM_POSITION");
+                tempResult.success(dataList);
+              }
             }
 
             @Override
             public void onFailed(String errorId, String message) {
-              result.error(errorId, "Error while downloading", "" + message);
+              if (isResultAvailable("DOWNLOAD_FROM_POSITION")) {
+                Result tempResult = getResultAndClear("DOWNLOAD_FROM_POSITION");
+                tempResult.error(errorId, message, null);
+              }
             }
           }
         );

@@ -55,7 +55,6 @@ public class DeviceClass {
   public static final int MN_COUNT = 8;
   private int timeCount = MN_COUNT;
   private IPresetManager presetManager;
-  private HashMap<Integer, MonitorManager> monitorManagers;
 
   private static DevReportManager devReportManager;
 
@@ -139,7 +138,7 @@ public class DeviceClass {
         }
       );
     } else {
-      result.onFailed("0", "CAMERA_NOT_FOUND");
+      result.onFailed("0", "Camera Not Found");
     }
   }
 
@@ -200,7 +199,7 @@ public class DeviceClass {
           String jsonName,
           int errorId
         ) {
-          resultCb.onFailed("0", "0");
+          resultCb.onFailed("0", "Please check the device connection");
         }
       }
     );
@@ -486,6 +485,31 @@ public class DeviceClass {
     }
   }
 
+  public static void setVideoFullScreen(
+    boolean isFullScreen,
+    myDomResultInterface resultCb
+  ) {
+    if (monitorManager != null) {
+      monitorManager.setVideoFullScreen(isFullScreen);
+
+      ArrayList dataList = new ArrayList<>();
+      dataList.add(monitorManager.isVideoFullScreen());
+      resultCb.onSuccess(dataList);
+    } else {
+      resultCb.onFailed("0", "No Streaming Found");
+    }
+  }
+
+  public static void isFullScreenStreaming(myDomResultInterface resultCb) {
+    if (monitorManager != null) {
+      ArrayList dataList = new ArrayList<>();
+      dataList.add(monitorManager.isVideoFullScreen());
+      resultCb.onSuccess(dataList);
+    } else {
+      resultCb.onFailed("0", "No Streaming Found");
+    }
+  }
+
   static void liveStream(
     Context context,
     String cameraId,
@@ -725,20 +749,15 @@ public class DeviceClass {
   }
 
   public int changeStream(int chnId, String cameraId) {
-    if (!monitorManagers.containsKey(chnId)) {
-      return SDKCONST.StreamType.Extra;
-    }
-
-    MonitorManager mediaManager = monitorManagers.get(chnId);
-    if (mediaManager != null) {
-      mediaManager.setStreamType(
-        mediaManager.getStreamType() == SDKCONST.StreamType.Extra
+    if (monitorManager != null) {
+      monitorManager.setStreamType(
+        monitorManager.getStreamType() == SDKCONST.StreamType.Extra
           ? SDKCONST.StreamType.Main
           : SDKCONST.StreamType.Extra
       );
-      mediaManager.stopPlay();
-      mediaManager.startMonitor();
-      return mediaManager.getStreamType();
+      monitorManager.stopPlay();
+      monitorManager.startMonitor();
+      return monitorManager.getStreamType();
     }
 
     return SDKCONST.StreamType.Extra;

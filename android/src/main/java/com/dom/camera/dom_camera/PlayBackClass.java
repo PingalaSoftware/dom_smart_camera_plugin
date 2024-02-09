@@ -113,7 +113,7 @@ public class PlayBackClass {
       downloadManager.startDownload();
       result.onSuccess(new ArrayList<>());
     } else {
-      result.onFailed("0", "0");
+      result.onFailed("0", "Error while downloading!");
     }
   }
 

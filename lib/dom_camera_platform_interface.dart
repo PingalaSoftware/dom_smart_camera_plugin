@@ -52,6 +52,15 @@ abstract class DomCameraPlatform extends PlatformInterface {
     throw UnimplementedError('setRecordType() has not been implemented.');
   }
 
+  Future<Map<String, dynamic>> isFullScreenStreaming() {
+    throw UnimplementedError(
+        'isFullScreenStreaming() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> fullScreenStream(bool isShowFullScreenStream) {
+    throw UnimplementedError('fullScreenStream() has not been implemented.');
+  }
+
   Future<Map<String, dynamic>> cameraStream(bool isShowStream) {
     throw UnimplementedError('cameraStream() has not been implemented.');
   }

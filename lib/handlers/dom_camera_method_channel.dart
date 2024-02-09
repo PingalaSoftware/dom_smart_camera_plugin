@@ -27,17 +27,17 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Future<Map<String, dynamic>> iosNetworkPermission() async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called iosNetworkPermission()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called iosNetworkPermission()"
+    //   };
+    // }
     if (Platform.isIOS) {
-      isRequestPending = true;
+      // isRequestPending = true;
       List result = await methodChannel.invokeMethod('WIFI_PERMISSION');
-      isRequestPending = false;
+      // isRequestPending = false;
 
       return {
         "isError": false,
@@ -54,19 +54,19 @@ class MethodChannelDomCamera extends DomCameraPlatform {
   @override
   Future<Map<String, dynamic>> addCamera(
       String wifiSsid, String wifiPassword) async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called addCamera()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called addCamera()"
+    //   };
+    // }
     try {
-      isRequestPending = true;
+      // isRequestPending = true;
 
       final apiResponse = await apiService.fetchMasterAccount();
       if (apiResponse['isError']) {
-        isRequestPending = false;
+        // isRequestPending = false;
         return apiResponse;
       }
 
@@ -85,7 +85,7 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
       final addResponse = await apiService.addDeviceToMasterAccount(
           version[0], account["username"]);
-      isRequestPending = false;
+      // isRequestPending = false;
       if (addResponse['isError']) return addResponse;
 
       return {
@@ -94,7 +94,7 @@ class MethodChannelDomCamera extends DomCameraPlatform {
         "cameraId": version[0]
       };
     } catch (e) {
-      isRequestPending = false;
+      // isRequestPending = false;
       if (e is PlatformException) {
         return {"isError": true, "message": e.message};
       }
@@ -108,16 +108,16 @@ class MethodChannelDomCamera extends DomCameraPlatform {
       String cameraId, String cameraType) async {
     if (isRequestPending) {
       return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called addCameraWithSerialNumber()"
+        // "isError": true,
+        // "message": "PENDING_PREVIOUS_REQUEST",
+        // "details": "Called addCameraWithSerialNumber()"
       };
     }
     try {
-      isRequestPending = true;
+      // isRequestPending = true;
       final apiResponse = await apiService.fetchMasterAccount();
       if (apiResponse['isError']) {
-        isRequestPending = false;
+        // isRequestPending = false;
         return apiResponse;
       }
 
@@ -136,7 +136,7 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
       final addResponse = await apiService.addDeviceToMasterAccount(
           version[0], account["username"]);
-      isRequestPending = false;
+      // isRequestPending = false;
       if (addResponse['isError']) return addResponse;
 
       return {
@@ -145,7 +145,7 @@ class MethodChannelDomCamera extends DomCameraPlatform {
         "cameraId": version[0]
       };
     } catch (e) {
-      isRequestPending = false;
+      // isRequestPending = false;
 
       if (e is PlatformException) {
         return {"isError": true, "message": e.message};
@@ -157,15 +157,15 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Future<Map<String, dynamic>> getUserInformation(String cameraId) async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called getUserInformation()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called getUserInformation()"
+    //   };
+    // }
     try {
-      isRequestPending = true;
+      // isRequestPending = true;
       final apiResponse = await apiService.getDeviceMasterAccount(cameraId);
       if (apiResponse['isError']) return apiResponse;
       final account = apiResponse["account"];
@@ -183,7 +183,7 @@ class MethodChannelDomCamera extends DomCameraPlatform {
         "details": jsonData["data"],
       };
     } catch (e) {
-      isRequestPending = false;
+      // isRequestPending = false;
       if (e is PlatformException) {
         return {"isError": true, "message": e.message};
       }
@@ -194,26 +194,26 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Future<Map<String, dynamic>> getCameraName() async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called getCameraName()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called getCameraName()"
+    //   };
+    // }
     try {
       if (initializedCamera.isEmpty) {
         return {"isError": true, "message": "Please Login to Camera!"};
       }
-      isRequestPending = true;
+      // isRequestPending = true;
 
       final data = await methodChannel
           .invokeMethod('GET_CAMERA_NAME', {"cameraId": initializedCamera});
-      isRequestPending = false;
+      // isRequestPending = false;
 
       return {"isError": false, "details": data[0]};
     } catch (e) {
-      isRequestPending = false;
+      // isRequestPending = false;
 
       if (e is PlatformException) {
         return {"isError": true, "message": e.message};
@@ -225,28 +225,28 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Future<Map<String, dynamic>> setCameraName(String newName) async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called setCameraName()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called setCameraName()"
+    //   };
+    // }
     try {
       if (initializedCamera.isEmpty) {
         return {"isError": true, "message": "Please Login to Camera!"};
       }
-      isRequestPending = true;
+      // isRequestPending = true;
 
       await methodChannel.invokeMethod('SET_CAMERA_NAME', {
         "cameraId": initializedCamera,
         "newName": newName,
       });
-      isRequestPending = false;
+      // isRequestPending = false;
 
       return {"isError": false};
     } catch (e) {
-      isRequestPending = false;
+      // isRequestPending = false;
 
       if (e is PlatformException) {
         return {"isError": true, "message": e.message};
@@ -258,26 +258,26 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Future<Map<String, dynamic>> addPresetPoint(int presetId) async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called addPresetPoint()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called addPresetPoint()"
+    //   };
+    // }
     try {
       if (initializedCamera.isEmpty) {
         return {"isError": true, "message": "Please Login to Camera!"};
       }
-      isRequestPending = true;
+      // isRequestPending = true;
 
       await methodChannel.invokeMethod('ADD_PRESET',
           {"cameraId": initializedCamera, "presetId": presetId, "chnNo": 1});
-      isRequestPending = false;
+      // isRequestPending = false;
 
       return {"isError": false};
     } catch (e) {
-      isRequestPending = false;
+      // isRequestPending = false;
 
       if (e is PlatformException) {
         return {"isError": true, "message": e.message};
@@ -289,26 +289,26 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Future<Map<String, dynamic>> turnToPreset(int presetId) async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called turnToPreset()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called turnToPreset()"
+    //   };
+    // }
     try {
       if (initializedCamera.isEmpty) {
         return {"isError": true, "message": "Please Login to Camera!"};
       }
-      isRequestPending = true;
+      // isRequestPending = true;
 
       await methodChannel.invokeMethod('TURN_TO_PRESET',
           {"cameraId": initializedCamera, "presetId": presetId, "chnNo": 1});
-      isRequestPending = false;
+      // isRequestPending = false;
 
       return {"isError": false};
     } catch (e) {
-      isRequestPending = false;
+      // isRequestPending = false;
 
       if (e is PlatformException) {
         return {"isError": true, "message": e.message};
@@ -320,27 +320,27 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Future<Map<String, dynamic>> getConfiguration(String type) async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called getConfiguration($type)"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called getConfiguration($type)"
+    //   };
+    // }
     try {
       if (initializedCamera.isEmpty) {
         return {"isError": true, "message": "Please Login to Camera!"};
       }
-      isRequestPending = true;
+      // isRequestPending = true;
 
       List data = await methodChannel.invokeMethod('GET_CONFIG', {
         "cameraId": initializedCamera,
         "type": type,
       });
-      isRequestPending = false;
+      // isRequestPending = false;
       return {"isError": false, "details": data[0]};
     } catch (e) {
-      isRequestPending = false;
+      // isRequestPending = false;
 
       if (e is PlatformException) {
         return {"isError": true, "message": e.message};
@@ -353,29 +353,29 @@ class MethodChannelDomCamera extends DomCameraPlatform {
   @override
   Future<Map<String, dynamic>> setConfiguration(
       String type, String newConfig) async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called setConfiguration($type)"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called setConfiguration($type)"
+    //   };
+    // }
     try {
       if (initializedCamera.isEmpty) {
         return {"isError": true, "message": "Please Login to Camera!"};
       }
-      isRequestPending = true;
+      // isRequestPending = true;
 
       await methodChannel.invokeMethod('SET_CONFIG', {
         "cameraId": initializedCamera,
         "type": type,
         "newConfig": newConfig,
       });
-      isRequestPending = false;
+      // isRequestPending = false;
 
       return {"isError": false};
     } catch (e) {
-      isRequestPending = false;
+      // isRequestPending = false;
 
       if (e is PlatformException) {
         return {"isError": true, "message": e.message};
@@ -387,26 +387,26 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Future<Map<String, dynamic>> getWifiInfo() async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called getWifiInfo()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called getWifiInfo()"
+    //   };
+    // }
     try {
       if (initializedCamera.isEmpty) {
         return {"isError": true, "message": "Please Login to Camera!"};
       }
-      isRequestPending = true;
+      // isRequestPending = true;
 
       List data = await methodChannel
           .invokeMethod('GET_WIFI_SIGNAL', {"cameraId": initializedCamera});
-      isRequestPending = false;
+      // isRequestPending = false;
 
       return {"isError": false, "details": data[0]};
     } catch (e) {
-      isRequestPending = false;
+      // isRequestPending = false;
 
       if (e is PlatformException) {
         return {"isError": true, "message": e.message};
@@ -418,26 +418,26 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Future<Map<String, dynamic>> getBatteryPercentage() async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called getBatteryPercentage()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called getBatteryPercentage()"
+    //   };
+    // }
     try {
       if (initializedCamera.isEmpty) {
         return {"isError": true, "message": "Please Login to Camera!"};
       }
-      isRequestPending = true;
+      // isRequestPending = true;
 
       List data = await methodChannel.invokeMethod(
           'GET_BATTERY_PERCENTAGE', {"cameraId": initializedCamera});
-      isRequestPending = false;
+      // isRequestPending = false;
 
       return {"isError": false, "details": data[0]};
     } catch (e) {
-      isRequestPending = false;
+      // isRequestPending = false;
 
       if (e is PlatformException) {
         return {"isError": true, "message": e.message};
@@ -449,15 +449,15 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Future<Map<String, dynamic>> cameraLogin(String cameraId) async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called cameraLogin()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called cameraLogin()"
+    //   };
+    // }
     try {
-      isRequestPending = true;
+      // isRequestPending = true;
       final apiResponse = await apiService.getDeviceMasterAccount(cameraId);
       if (apiResponse['isError']) return apiResponse;
       final account = apiResponse["account"];
@@ -469,7 +469,7 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
       await methodChannel.invokeMethod('CAMERA_LOGIN', {"cameraId": cameraId});
       initializedCamera = cameraId;
-      isRequestPending = false;
+      // isRequestPending = false;
       isUserLogged = true;
 
       return {
@@ -477,7 +477,7 @@ class MethodChannelDomCamera extends DomCameraPlatform {
         "message": "Camera Logged in",
       };
     } catch (e) {
-      isRequestPending = false;
+      // isRequestPending = false;
       if (e is PlatformException) {
         return {"isError": true, "message": e.message};
       }
@@ -489,22 +489,22 @@ class MethodChannelDomCamera extends DomCameraPlatform {
   @override
   Future<Map<String, dynamic>> setDeviceAlarmCallback(
       String callbackUrl, String? cameraId) async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called setDeviceAlarmCallback()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called setDeviceAlarmCallback()"
+    //   };
+    // }
     try {
       if (initializedCamera.isEmpty && cameraId == null) {
         return {"isError": true, "message": "Please Login to Camera!"};
       }
-      isRequestPending = true;
+      // isRequestPending = true;
 
       final apiResponse = await apiService.setDeviceAlarmCallback(
           cameraId ?? initializedCamera, callbackUrl);
-      isRequestPending = false;
+      // isRequestPending = false;
 
       if (apiResponse['isError']) return apiResponse;
 
@@ -513,7 +513,7 @@ class MethodChannelDomCamera extends DomCameraPlatform {
         "message": "Callback set successful",
       };
     } catch (e) {
-      isRequestPending = false;
+      // isRequestPending = false;
 
       if (e is PlatformException) {
         return {"isError": true, "message": e.message};
@@ -525,20 +525,20 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Future<Map<String, dynamic>> cameraState(String cameraId) async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called cameraState()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called cameraState()"
+    //   };
+    // }
 
-    isRequestPending = true;
+    // isRequestPending = true;
 
     if (!isUserLogged || initializedCamera != cameraId) {
       final apiResponse = await apiService.getDeviceMasterAccount(cameraId);
       if (apiResponse['isError']) {
-        isRequestPending = false;
+        // isRequestPending = false;
         return apiResponse;
       }
       final account = apiResponse["account"];
@@ -556,7 +556,7 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
     final state = await methodChannel
         .invokeMethod('GET_CAMERA_STATE', {"cameraId": cameraId});
-    isRequestPending = false;
+    // isRequestPending = false;
 
     if (state[0] == 0) return {"isError": false, "state": "OFF_LINE"};
     if (state[0] == 1) return {"isError": false, "state": "ON_LINE"};
@@ -571,26 +571,26 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Future<Map<String, dynamic>> setHumanDetection(bool isEnabled) async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called setHumanDetection()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called setHumanDetection()"
+    //   };
+    // }
     try {
       if (initializedCamera.isEmpty) {
         return {"isError": true, "message": "Please Login to Camera!"};
       }
-      isRequestPending = true;
+      // isRequestPending = true;
 
       await methodChannel.invokeMethod('SET_HUMAN_DETECTION',
           {"cameraId": initializedCamera, "isEnabled": isEnabled});
-      isRequestPending = false;
+      // isRequestPending = false;
 
       return {"isError": false};
     } catch (e) {
-      isRequestPending = false;
+      // isRequestPending = false;
 
       if (e is PlatformException) {
         return {"isError": true, "message": e.message};
@@ -602,13 +602,13 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Future<Map<String, dynamic>> setRecordType(String type) async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called setRecordType()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called setRecordType()"
+    //   };
+    // }
     if (type != "ALWAYS" && type != "NEVER" && type != "ALARM") {
       return {"error": true, "message": "Invalid record type [$type]"};
     }
@@ -616,15 +616,82 @@ class MethodChannelDomCamera extends DomCameraPlatform {
       if (initializedCamera.isEmpty) {
         return {"isError": true, "message": "Please Login to Camera!"};
       }
-      isRequestPending = true;
+      // isRequestPending = true;
 
       await methodChannel.invokeMethod(
           'SET_RECORD_TYPE', {"cameraId": initializedCamera, "type": type});
-      isRequestPending = false;
+      // isRequestPending = false;
 
       return {"isError": false};
     } catch (e) {
-      isRequestPending = false;
+      // isRequestPending = false;
+      if (e is PlatformException) {
+        return {"isError": true, "message": e.message};
+      }
+
+      return {"isError": true, "message": "Error: $e"};
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> isFullScreenStreaming() async {
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called fullScreenStream()"
+    //   };
+    // }
+    try {
+      if (initializedCamera.isEmpty) {
+        return {"isError": true, "message": "Please Login to Camera!"};
+      }
+      // isRequestPending = true;
+
+      final result =
+          await methodChannel.invokeMethod('IS_FULL_SCREEN_STREAMING');
+      // isRequestPending = false;
+
+      return {"isError": false, "isFullScreenStreaming": result[0]};
+    } catch (e) {
+      // isRequestPending = false;
+      if (e is PlatformException) {
+        return {"isError": true, "message": e.message};
+      }
+
+      return {"isError": true, "message": "Error: $e"};
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> fullScreenStream(
+      bool isShowFullScreenStream) async {
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called fullScreenStream()"
+    //   };
+    // }
+    try {
+      if (initializedCamera.isEmpty) {
+        return {"isError": true, "message": "Please Login to Camera!"};
+      }
+      // isRequestPending = true;
+
+      final result = await methodChannel.invokeMethod(
+          'SHOW_FULL_SCREEN', {"isFullScreen": isShowFullScreenStream});
+      // isRequestPending = false;
+
+      return {
+        "isError": false,
+        "message": isShowFullScreenStream
+            ? "Started Full-Screen Streaming!"
+            : "Stopped Full-Screen Streaming!",
+        "isFullScreenStreaming": result[0]
+      };
+    } catch (e) {
+      // isRequestPending = false;
       if (e is PlatformException) {
         return {"isError": true, "message": e.message};
       }
@@ -635,23 +702,23 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Future<Map<String, dynamic>> cameraStream(bool isShowStream) async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called cameraStream()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called cameraStream()"
+    //   };
+    // }
     try {
       if (initializedCamera.isEmpty) {
         return {"isError": true, "message": "Please Login to Camera!"};
       }
-      isRequestPending = true;
+      // isRequestPending = true;
 
       if (isShowStream) {
         await methodChannel
             .invokeMethod('LIVE_STREAM', {"cameraId": initializedCamera});
-        isRequestPending = false;
+        // isRequestPending = false;
 
         return {
           "isError": false,
@@ -659,14 +726,14 @@ class MethodChannelDomCamera extends DomCameraPlatform {
         };
       } else {
         methodChannel.invokeMethod('STOP_STREAM');
-        isRequestPending = false;
+        // isRequestPending = false;
         return {
           "isError": false,
           "message": isShowStream ? "Started Streaming!" : "Stopped Streaming!"
         };
       }
     } catch (e) {
-      isRequestPending = false;
+      // isRequestPending = false;
       if (e is PlatformException) {
         return {"isError": true, "message": e.message};
       }
@@ -677,24 +744,24 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Map<String, dynamic> cameraAudio(bool audioState) {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called cameraAudio()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called cameraAudio()"
+    //   };
+    // }
     if (initializedCamera.isEmpty) {
       return {"isError": true, "message": "Invalid camera operation!"};
     }
 
-    isRequestPending = true;
+    // isRequestPending = true;
     if (audioState) {
       methodChannel.invokeMethod('START_AUDIO');
     } else {
       methodChannel.invokeMethod('STOP_AUDIO');
     }
-    isRequestPending = false;
+    // isRequestPending = false;
 
     return {
       "isError": false,
@@ -704,13 +771,13 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Map<String, dynamic> interCommunication(bool isStart, bool isSingleChannel) {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called interCommunication()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called interCommunication()"
+    //   };
+    // }
     if (initializedCamera.isEmpty) {
       return {"isError": true, "message": "Invalid camera operation!"};
     }
@@ -757,13 +824,13 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Map<String, dynamic> captureImageSaveLocal() {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called captureImageSaveLocal()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called captureImageSaveLocal()"
+    //   };
+    // }
     if (initializedCamera.isEmpty) {
       return {"isError": true, "message": "Invalid camera operation!"};
     }
@@ -775,13 +842,13 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Map<String, dynamic> videoRecordAndSaveLocal(bool isStart) {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called videoRecordAndSaveLocal()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called videoRecordAndSaveLocal()"
+    //   };
+    // }
     if (initializedCamera.isEmpty) {
       return {"isError": true, "message": "Invalid camera operation!"};
     }
@@ -800,22 +867,22 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Future<Map<String, dynamic>> imageListInCamera() async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called imageListInCamera()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called imageListInCamera()"
+    //   };
+    // }
     try {
       if (initializedCamera.isEmpty) {
         return {"isError": true, "message": "Invalid camera operation!"};
       }
-      isRequestPending = true;
+      // isRequestPending = true;
 
       List dataList = await methodChannel
           .invokeMethod('IMAGE_LIST', {"cameraId": initializedCamera});
-      isRequestPending = false;
+      // isRequestPending = false;
 
       String arrayString = dataList[0];
       List<String> elements = arrayString.split('H264_DVR_FILE_DATA ');
@@ -833,7 +900,7 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
       return {"isError": false, "dataList": result};
     } catch (e) {
-      isRequestPending = false;
+      // isRequestPending = false;
       if (e is PlatformException) {
         return {"isError": true, "message": e.message};
       }
@@ -844,22 +911,22 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Future<Map<String, dynamic>> imageDownloadFromCamera(position) async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called imageDownloadFromCamera()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called imageDownloadFromCamera()"
+    //   };
+    // }
     if (initializedCamera.isEmpty) {
       return {"isError": true, "message": "Invalid camera operation!"};
     }
-    isRequestPending = true;
+    // isRequestPending = true;
 
     List dataList = await methodChannel
         .invokeMethod('IMAGE_SAVE_LOCAL', {"position": position});
 
-    isRequestPending = false;
+    // isRequestPending = false;
     return {
       "isError": false,
       "dataList": dataList,
@@ -876,13 +943,13 @@ class MethodChannelDomCamera extends DomCameraPlatform {
     String toMonth,
     String toYear,
   ) async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called playbackList()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called playbackList()"
+    //   };
+    // }
     try {
       DateTime currentDate = DateTime.now();
       DateTime pickedDate = DateTime(
@@ -899,7 +966,7 @@ class MethodChannelDomCamera extends DomCameraPlatform {
         return {"isError": true, "message": "Invalid camera operation!"};
       }
 
-      isRequestPending = true;
+      // isRequestPending = true;
       List dataList = await methodChannel.invokeMethod('PLAYBACK_LIST', {
         "cameraId": initializedCamera,
         "fromDate": fromDate,
@@ -909,11 +976,11 @@ class MethodChannelDomCamera extends DomCameraPlatform {
         "toMonth": toMonth,
         "toYear": toYear,
       });
-      isRequestPending = false;
+      // isRequestPending = false;
 
       return {"isError": false, "dataList": dataList};
     } catch (e) {
-      isRequestPending = false;
+      // isRequestPending = false;
       if (e is PlatformException) {
         return {"isError": true, "message": e.message};
       }
@@ -924,49 +991,49 @@ class MethodChannelDomCamera extends DomCameraPlatform {
 
   @override
   Future<Map<String, dynamic>> playFromPosition(position) async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called playFromPosition()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called playFromPosition()"
+    //   };
+    // }
     isPlaybackStarted = true;
     if (initializedCamera.isEmpty) {
       return {"isError": true, "message": "Invalid camera operation!"};
     }
-    isRequestPending = true;
+    // isRequestPending = true;
 
     await methodChannel
         .invokeMethod('PLAY_FROM_POSITION', {"position": position});
-    isRequestPending = false;
+    // isRequestPending = false;
 
     return {"isError": false};
   }
 
   @override
   Future<Map<String, dynamic>> downloadFromPosition(position) async {
-    if (isRequestPending) {
-      return {
-        "isError": true,
-        "message": "PENDING_PREVIOUS_REQUEST",
-        "details": "Called downloadFromPosition()"
-      };
-    }
+    // if (isRequestPending) {
+    //   return {
+    //     "isError": true,
+    //     "message": "PENDING_PREVIOUS_REQUEST",
+    //     "details": "Called downloadFromPosition()"
+    //   };
+    // }
     try {
       isPlaybackStarted = true;
       if (initializedCamera.isEmpty) {
         return {"isError": true, "message": "Invalid camera operation!"};
       }
 
-      isRequestPending = true;
+      // isRequestPending = true;
       await methodChannel.invokeMethod('DOWNLOAD_FROM_POSITION',
           {"position": position, "cameraId": initializedCamera});
-      isRequestPending = false;
+      // isRequestPending = false;
 
       return {"isError": false};
     } catch (e) {
-      isRequestPending = false;
+      // isRequestPending = false;
       if (e is PlatformException) {
         return {"isError": true, "message": e.message};
       }

@@ -74,6 +74,18 @@ class DomCamera {
     return DomCameraPlatform.instance.setRecordType(type);
   }
 
+  Future<Map<String, dynamic>> isFullScreenStreaming() {
+    return DomCameraPlatform.instance.isFullScreenStreaming();
+  }
+
+  Future<Map<String, dynamic>> showFullScreenStream() {
+    return DomCameraPlatform.instance.fullScreenStream(true);
+  }
+
+  Future<Map<String, dynamic>> stopFullScreenStream() {
+    return DomCameraPlatform.instance.fullScreenStream(false);
+  }
+
   Future<Map<String, dynamic>> startStreaming() {
     return DomCameraPlatform.instance.cameraStream(true);
   }
