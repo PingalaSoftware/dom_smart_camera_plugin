@@ -1,4 +1,5 @@
 import 'package:dom_camera_example/scenes/camera/home_screen.dart';
+import 'package:dom_camera_example/scenes/camera/monitor/camera_full_screen.dart';
 import 'package:dom_camera_example/scenes/camera/monitor/camera_home_screen.dart';
 import 'package:dom_camera_example/scenes/camera/monitor/monitor_home_screen.dart';
 import 'package:dom_camera_example/scenes/camera/monitor/playback/picture_list.dart';
@@ -40,6 +41,9 @@ class AppRoutes {
 
         return MaterialPageRoute(
             builder: (_) => SettingsPage(cameraId: args["cameraId"]));
+
+      case ScreenRoutes.cameraFullScreen:
+        return MaterialPageRoute(builder: (_) => const CameraFullScreen());
 
       default:
         return _errorRoute();

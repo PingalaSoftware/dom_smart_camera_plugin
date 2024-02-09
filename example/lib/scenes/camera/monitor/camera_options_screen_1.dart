@@ -25,6 +25,7 @@ class _CameraOptionScreen1State extends State<CameraOptionScreen1> {
   bool _isLoading = false;
   late VoidCallback onStreamError;
 
+  bool isFirstTime = true;
   @override
   void initState() {
     super.initState();
@@ -54,6 +55,15 @@ class _CameraOptionScreen1State extends State<CameraOptionScreen1> {
           SnackBar(content: Text(data["message"])),
         );
       }
+      return;
+    }
+
+    if (isFirstTime) {
+      setState(() {
+        isFirstTime = false;
+      });
+      _domCameraPlugin.stopStreaming();
+      _startLiveView();
       return;
     }
 
