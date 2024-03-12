@@ -302,7 +302,8 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    final wifiName = await info.getWifiName();
+    var wifiName = await info.getWifiName();
+    wifiName = removeQuotesIfPresent(wifiName);
 
     getWifiPasswordAlert(
       localContext,

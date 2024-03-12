@@ -107,6 +107,10 @@ abstract class DomCameraPlatform extends PlatformInterface {
     throw UnimplementedError('playbackList() has not been implemented.');
   }
 
+  Map<String, dynamic> stopPlayBack() {
+    throw UnimplementedError('stopPlayBack() has not been implemented.');
+  }
+
   Future<Map<String, dynamic>> playFromPosition(int position) {
     throw UnimplementedError('playFromPosition() has not been implemented.');
   }

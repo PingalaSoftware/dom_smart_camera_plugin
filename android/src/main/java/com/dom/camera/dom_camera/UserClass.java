@@ -10,7 +10,6 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Message;
-import android.widget.Toast;
 import androidx.core.app.ActivityCompat;
 import com.basic.G;
 import com.lib.MsgContent;
@@ -21,10 +20,8 @@ import com.manager.db.DevDataCenter;
 import com.manager.db.XMDevInfo;
 import com.manager.device.DeviceManager;
 import com.manager.device.config.preset.IPresetManager;
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -102,11 +99,11 @@ public class UserClass {
       return;
     }
     deviceManager.startQuickSetWiFi(
-      wifiInfo.getSSID(),
+      ssid,
       password,
       scanResult.capabilities,
       dhcpInfo,
-      1000,
+      3 * 60 * 1000,
       (xmDevInfo, errorId) -> {
         manager.addDev(
           xmDevInfo,

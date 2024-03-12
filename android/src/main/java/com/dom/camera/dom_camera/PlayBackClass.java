@@ -53,11 +53,13 @@ public class PlayBackClass {
   public static void downloadVideoFile(
     int position,
     String deviceId,
+    EventSink eventSinkCB,
     DeviceClass.myDomResultInterface result
   ) {
     if (dataList == null || position >= dataList.size()) {
       return;
     }
+    eventSink = eventSinkCB;
 
     String storagePath =
       Environment.getExternalStorageDirectory() +
@@ -93,7 +95,23 @@ public class PlayBackClass {
         File.separator;
     }
 
-    DownloadManager downloadManager = DownloadManager.getInstance(null);
+    DownloadManager downloadManager = DownloadManager.getInstance(
+      new DownloadManager.OnDownloadListener() {
+        @Override
+        public void onDownload(DownloadInfo info) {
+          if (info != null && eventSink != null) {
+            Map<String, Object> jsonData = new HashMap<>();
+
+            jsonData.put("key", "PLAYBACK_DOWNLOAD_PROGRESS");
+            jsonData.put("state", info.getDownloadState());
+            jsonData.put("progress", info.getDownloadProgress());
+            String jsonString = new Gson().toJson(jsonData);
+
+            eventSink.success(jsonString);
+          }
+        }
+      }
+    );
 
     H264_DVR_FILE_DATA data = dataList.get(position);
     if (data != null) {
@@ -140,6 +158,7 @@ public class PlayBackClass {
       deviceManager.createRecordPlayer(viewGroup, deviceID, PLAY_DEV_PLAYBACK);
     recordManager.setChnId(0);
     recordManager.setTouchable(false);
+    recordManager.setBtnPlayVisible(false);
 
     searchRecordByFile();
     new XMRecyclerView(viewGroup.getContext(), null);
@@ -318,6 +337,7 @@ public class PlayBackClass {
     EventSink eventSinkCB,
     DeviceClass.myDomResultInterface resultCb
   ) {
+    recordManager.stopPlay();
     H264_DVR_FILE_DATA recordInfo = dataList.get(position);
     Calendar playCalendar = TimeUtils.getNormalFormatCalender(
       recordInfo.getStartTimeOfYear()
@@ -330,6 +350,12 @@ public class PlayBackClass {
     eventSink = eventSinkCB;
     playBackEndTime = playCalendarEndTime;
     recordManager.startPlay(playCalendar, playCalendarEndTime);
+    recordManager.setTouchable(false);
+    recordManager.setBtnPlayVisible(false);
+  }
+
+  public static void stopPlayBack() {
+    recordManager.stopPlay();
   }
 
   public void searchRecordByFile() {

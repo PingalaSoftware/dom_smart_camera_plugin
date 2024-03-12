@@ -867,11 +867,14 @@ public class DomCameraPlugin
           }
         );
         break;
+      case STOP_PLAY_BACK:
+        PlayBackClass.stopPlayBack();
+        break;
       case PLAY_FROM_POSITION:
-        if (isResultAvailable("PLAY_FROM_POSITION")) {
-          result.error("0", "Request is in progress", null);
-          break;
-        }
+//        if (isResultAvailable("PLAY_FROM_POSITION")) {
+//          result.error("0", "Request is in progress", null);
+//          break;
+//        }
         storeResult("PLAY_FROM_POSITION", result);
 
         position = call.argument("position");
@@ -908,17 +911,16 @@ public class DomCameraPlugin
         cameraId = call.argument("cameraId");
 
         PlayBackClass.downloadVideoFile(
-          position,
-          cameraId,
-          new DeviceClass.myDomResultInterface() {
+                position,
+                cameraId,
+                eventSink,
+                new DeviceClass.myDomResultInterface() {
             public void onSuccess(List<String> dataList) {
               if (isResultAvailable("DOWNLOAD_FROM_POSITION")) {
                 Result tempResult = getResultAndClear("DOWNLOAD_FROM_POSITION");
                 tempResult.success(dataList);
               }
             }
-
-            @Override
             public void onFailed(String errorId, String message) {
               if (isResultAvailable("DOWNLOAD_FROM_POSITION")) {
                 Result tempResult = getResultAndClear("DOWNLOAD_FROM_POSITION");

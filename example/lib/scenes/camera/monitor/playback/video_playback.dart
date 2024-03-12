@@ -56,6 +56,13 @@ class _VideoPlaybackState extends State<VideoPlayback> {
     );
   }
 
+  @override
+  void dispose() {
+    _domCameraPlugin.stopPlayBack();
+
+    super.dispose();
+  }
+
   getPlayBackList(String dateFrom, String monthFrom, String yearFrom,
       String dateTo, String monthTo, String yearTo) async {
     final result = await _domCameraPlugin.playbackList(
@@ -186,12 +193,6 @@ class _VideoPlaybackState extends State<VideoPlayback> {
                   child: TextButton(
                     onPressed: () async {
                       await _domCameraPlugin.downloadFromPosition(index);
-
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Download Completed!")),
-                        );
-                      }
                     },
                     child: const Icon(Icons.download),
                   ),

@@ -63,7 +63,8 @@ class _CameraOptionScreen1State extends State<CameraOptionScreen1> {
         isFirstTime = false;
       });
       _domCameraPlugin.stopStreaming();
-      _startLiveView();
+      Future.delayed(
+          const Duration(milliseconds: 800), () => {_startLiveView()});
       return;
     }
 

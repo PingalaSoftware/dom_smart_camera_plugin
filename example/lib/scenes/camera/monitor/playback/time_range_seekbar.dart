@@ -28,8 +28,84 @@ class _TimeRangeSeekBarState extends State<TimeRangeSeekBar> {
         _domCameraPlugin.playbackTimerStreamListener().listen(timerData);
   }
 
+  bool isDialogShown = false;
+  int dummyProgress = 0;
+
   void timerData(event) {
     final eventJsonString = json.decode(event);
+
+    if (eventJsonString["key"] == "PLAYBACK_DOWNLOAD_PROGRESS") {
+      if (eventJsonString["state"] == 1) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Download Started!")),
+          );
+        }
+        setState(() {
+          isDialogShown = true;
+        });
+      } else if (eventJsonString["state"] == 2) {
+        setState(() {
+          dummyProgress = eventJsonString["progress"];
+        });
+      } else if (eventJsonString["state"] == 6) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Download Completed!")),
+          );
+        }
+        if (isDialogShown) {
+          setState(() {
+            isDialogShown = false;
+          });
+        }
+      } else if (eventJsonString["state"] == 3) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Download Completed!")),
+          );
+        }
+        if (isDialogShown) {
+          setState(() {
+            isDialogShown = false;
+          });
+        }
+      } else if (eventJsonString["state"] == 4) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Download Stopped!")),
+          );
+        }
+        if (isDialogShown) {
+          setState(() {
+            isDialogShown = false;
+          });
+        }
+      } else if (eventJsonString["state"] == 5) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Download Failed!")),
+          );
+        }
+        if (isDialogShown) {
+          setState(() {
+            isDialogShown = false;
+          });
+        }
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Unknown error!")),
+          );
+        }
+        if (isDialogShown) {
+          setState(() {
+            isDialogShown = false;
+          });
+        }
+      }
+    }
+
     if (eventJsonString["key"] == "PLAYBACK_STREAM_DATA") {
       setState(() {
         time = eventJsonString["time"];
@@ -46,13 +122,27 @@ class _TimeRangeSeekBarState extends State<TimeRangeSeekBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text("$time [$rate]"),
-        ],
-      ),
+    return Column(
+      children: [
+        if (isDialogShown)
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Downloading video... ($dummyProgress%)',
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("$time [$rate]"),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

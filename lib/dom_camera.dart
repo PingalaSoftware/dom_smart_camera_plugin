@@ -154,6 +154,10 @@ class DomCamera {
         .playbackList(fromDate, fromMonth, fromYear, toDate, toMonth, toYear);
   }
 
+  Map<String, dynamic> stopPlayBack() {
+    return DomCameraPlatform.instance.stopPlayBack();
+  }
+
   Future<Map<String, dynamic>> playFromPosition(int position) {
     return DomCameraPlatform.instance.playFromPosition(position);
   }

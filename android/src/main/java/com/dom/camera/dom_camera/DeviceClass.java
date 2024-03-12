@@ -544,13 +544,6 @@ public class DeviceClass {
           long rate
         ) {}
 
-        public void onShowRateAndTime(
-          PlayerAttribute attribute,
-          boolean isShowTime,
-          String time,
-          String rate
-        ) {}
-
         public void onVideoBufferEnd(PlayerAttribute attribute, MsgContent ex) {
           resultCb.onSuccess(new ArrayList<>());
         }
