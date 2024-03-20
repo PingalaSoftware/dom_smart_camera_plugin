@@ -61,6 +61,8 @@
     NSInteger playBackNotIndexPosition;
     BOOL isGetConfig;
     BOOL isWiFiConfig;
+    BOOL isSetRecordConfig;
+    NSString *setRecordType;
 }
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
@@ -618,8 +620,6 @@
     
 //    ##############################
  else if ([@"GET_WIFI_SIGNAL" isEqualToString:call.method]) {
-//     NSDictionary *arguments = call.arguments;
-//     NSString *cameraId = arguments[@"cameraId"];
      NSLog(@"GET_WIFI_SIGNAL:");
      isWiFiConfig = true;
 
@@ -628,10 +628,17 @@
 
      flutterResult = result;
  }
+ else if ([@"SET_RECORD_TYPE" isEqualToString:call.method]) {
+     NSDictionary *arguments = call.arguments;
+     
+     isSetRecordConfig = true;
+     setRecordType = arguments[@"type"];
+
+     FUN_DevGetConfig_Json(self.msgHandle, [mainCameraId UTF8String], "Record", 0, -1);
+     flutterResult = result;
+ }
  else if ([@"GET_BATTERY_PERCENTAGE" isEqualToString:call.method]) {
      NSDictionary *arguments = call.arguments;
-     NSString *cameraId = arguments[@"cameraId"];
-     NSLog(@"GET_BATTERY_PERCENTAGE: %@", arguments);
      FUN_DevStartUploadData(self.msgHandle, [mainCameraId UTF8String], 5, 209);
      flutterResult = result;
 //     int FUN_DevStartUploadData(UI_HANDLE hUser, const char *szDevId, int nUploadDataType, int nSeq);
@@ -1159,7 +1166,48 @@
             break;
         case EMSG_DEV_GET_CONFIG_JSON:
             NSLog(@"EMSG_DEV_GET_CONFIG_JSON:");
-            if([([NSString stringWithUTF8String:msg->szStr]) isEqualToString:@"WifiRouteInfo"]) {
+            if(isSetRecordConfig) {
+                isSetRecordConfig = false;
+                    
+                NSData *jsonData = [@(msg->pObject) dataUsingEncoding:NSUTF8StringEncoding];
+                NSError *error;
+                NSMutableDictionary *jsonObject = [NSJSONSerialization JSONObjectWithData:jsonData
+                                                                                  options:NSJSONReadingMutableContainers
+                                                                                    error:&error];
+                NSMutableArray *record = jsonObject[@"Record"];
+                if([@"ALWAYS" isEqualToString:setRecordType]) {
+                    for (NSMutableDictionary *recordDict in record) {
+                        NSMutableArray *mask = recordDict[@"Mask"];
+                        for (NSMutableArray *innerMask in mask) {
+                            innerMask[0] = @"0x00000007";
+                        }
+                    }
+                }else if([@"ALARM" isEqualToString:setRecordType])  {
+                    for (NSMutableDictionary *recordDict in record) {
+                        NSMutableArray *mask = recordDict[@"Mask"];
+                        for (NSMutableArray *innerMask in mask) {
+                            innerMask[0] = @"0x00000006";
+                        }
+                    }
+                } else if([@"NEVER" isEqualToString:setRecordType])  {
+                    for (NSMutableDictionary *recordDict in record) {
+                        NSMutableArray *mask = recordDict[@"Mask"];
+                        for (NSMutableArray *innerMask in mask) {
+                            innerMask[0] = @"0x00000000";
+                        }
+                    }
+                }
+                       
+                
+                NSData *updatedJsonData = [NSJSONSerialization dataWithJSONObject:jsonObject
+                                                                           options:NSJSONWritingPrettyPrinted
+                                                                             error:&error];
+
+                NSString *updatedJsonString = [[NSString alloc] initWithData:updatedJsonData
+                                                                    encoding:NSUTF8StringEncoding];
+                FUN_DevSetConfig_Json(self.msgHandle, [mainCameraId UTF8String], "Record", [updatedJsonString UTF8String], (int)[updatedJsonString length]+1, -1);
+            }
+            else if([([NSString stringWithUTF8String:msg->szStr]) isEqualToString:@"WifiRouteInfo"]) {
                 isWiFiConfig = true;
                 NSData *retJsonData = [NSData dataWithBytes:msg->pObject length:strlen(msg->pObject)];
                 NSLog(@"EMSG_DEV_GET_CONFIG_JSON:1");
