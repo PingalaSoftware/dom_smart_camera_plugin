@@ -59,7 +59,7 @@ class _CameraFullScreenState extends State<CameraFullScreen>
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
         child: DecoratedBox(
-          decoration: const BoxDecoration(color: Colors.blueAccent),
+          decoration: const BoxDecoration(color: Colors.black),
           child: _domCameraPlugin.cameraStreamWidget(),
         ),
       ),

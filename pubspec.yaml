@@ -1,6 +1,6 @@
 name: dom_camera
 description: Plugin for DOM smart camera app.
-version: 0.0.14
+version: 0.0.15
 homepage: https://github.com/JithendraDom/dom_smart_camera_plugin
 
 environment:

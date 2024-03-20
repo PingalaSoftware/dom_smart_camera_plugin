@@ -916,8 +916,19 @@ class MethodChannelDomCamera extends DomCameraPlatform {
   }
 
   @override
-  Map<String, dynamic> skipPlayBack(int skipTime) {
-    methodChannel.invokeMethod('PB_SKIP_TIME', {"skipTime": skipTime});
+  Future<Map<String, dynamic>> skipPlayBack(
+      int hour, int minute, int sec) async {
+    if (hour > 24) return {"isError": true, "message": "Invalid Hour"};
+    if (minute > 60) return {"isError": true, "message": "Invalid Minute"};
+    if (sec > 60) return {"isError": true, "message": "Invalid Second"};
+
+    DateTime now = DateTime.now();
+    DateTime startOfToday = DateTime(now.year, now.month, now.day, 00, 00, 00);
+    DateTime curTime =
+        DateTime(now.year, now.month, now.day, hour, minute, sec);
+    int skipTime = curTime.difference(startOfToday).inSeconds;
+
+    await methodChannel.invokeMethod('PB_SKIP_TIME', {"skipTime": skipTime});
     return {"isError": false};
   }
 

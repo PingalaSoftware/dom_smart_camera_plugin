@@ -191,7 +191,10 @@ public class PlayBackClass {
           int msgId,
           int errorId
         ) {
-          if (msgId == 5101) {
+          if (isStartPlaybackCalled) {
+            isStartPlaybackCalled = false;
+            resultCallback.onFailed("0", "ErrorId: "+errorId);
+          } else if (msgId == 5101) {
             result.onFailed("0" + errorId, "No Data Found");
           } else {
             result.onFailed("" + errorId, "Failed to get list from device!");
@@ -256,7 +259,10 @@ public class PlayBackClass {
     );
   }
 
-  public static void seekToTime(int times) {
+  public static void seekToTime(
+    int times,
+    DeviceClass.myDomResultInterface resultCb
+  ) {
     Calendar searchTime = Calendar.getInstance();
     searchTime.set(Calendar.DAY_OF_MONTH, Integer.valueOf(fromDate));
     searchTime.set(Calendar.MONTH, Integer.valueOf(fromMonth) - 1);
@@ -275,6 +281,8 @@ public class PlayBackClass {
     };
 
     int absTime = FunSDK.ToTimeType(time) + times;
+    isStartPlaybackCalled = true;
+    resultCallback = resultCb;
     recordManager.seekToTime(times, absTime);
   }
 

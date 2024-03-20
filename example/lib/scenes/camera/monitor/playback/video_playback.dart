@@ -23,6 +23,7 @@ class _VideoPlaybackState extends State<VideoPlayback> {
   late String cameraId;
   List<List<String>> dataList = [];
   bool isListLoading = true;
+  bool isSkipLoading = false;
   String startTime = "";
   String endTime = "";
   bool isPlaying = false;
@@ -65,6 +66,9 @@ class _VideoPlaybackState extends State<VideoPlayback> {
 
   getPlayBackList(String dateFrom, String monthFrom, String yearFrom,
       String dateTo, String monthTo, String yearTo) async {
+    setState(() {
+      isListLoading = true;
+    });
     final result = await _domCameraPlugin.playbackList(
         dateFrom, monthFrom, yearFrom, dateTo, monthTo, yearTo);
 
@@ -124,7 +128,7 @@ class _VideoPlaybackState extends State<VideoPlayback> {
     );
     if (picked != null && picked != selectedDateTo) {
       setState(() {
-        selectedDateFrom = picked;
+        selectedDateTo = picked;
       });
     }
   }
@@ -225,7 +229,7 @@ class _VideoPlaybackState extends State<VideoPlayback> {
             SizedBox(
               height: 240,
               child: DecoratedBox(
-                decoration: const BoxDecoration(color: Colors.redAccent),
+                decoration: const BoxDecoration(color: Colors.black),
                 child: _domCameraPlugin.videoPlaybackWidget(),
               ),
             ),
@@ -293,7 +297,69 @@ class _VideoPlaybackState extends State<VideoPlayback> {
                       }
                     },
                   ),
-                  const Expanded(child: PlaybackTimeWidget())
+                  Expanded(
+                      child: isSkipLoading
+                          ? const CircularProgressIndicator()
+                          : ElevatedButton(
+                              onPressed: () async {
+                                DateTime startTimeTemp =
+                                    DateTime.parse(startTime);
+                                DateTime endTimeTemp = DateTime.parse(endTime);
+
+                                final pickedTime = await showTimePicker(
+                                  context: context,
+                                  initialTime: TimeOfDay.now(),
+                                  hourLabelText:
+                                      "Hour: [${startTimeTemp.hour == endTimeTemp.hour ? "${startTimeTemp.hour}" : "${startTimeTemp.hour} -${endTimeTemp.hour}"}]",
+                                  minuteLabelText:
+                                      "Minute: [${startTimeTemp.minute} -${endTimeTemp.minute}]",
+                                  helpText:
+                                      "Select time within $startTime - $endTime",
+                                  initialEntryMode:
+                                      TimePickerEntryMode.inputOnly,
+                                );
+
+                                if (pickedTime != null) {
+                                  setState(() {
+                                    isSkipLoading = true;
+                                  });
+
+                                  DateTime pickedDateTime = DateTime(
+                                    startTimeTemp.year,
+                                    startTimeTemp.month,
+                                    startTimeTemp.day,
+                                    pickedTime.hour,
+                                    pickedTime.minute,
+                                  );
+
+                                  if (pickedDateTime.isAfter(startTimeTemp) &&
+                                      pickedDateTime.isBefore(endTimeTemp)) {
+                                    await _domCameraPlugin.skipPlayBack(
+                                        pickedTime.hour, pickedTime.minute, 00);
+                                  } else {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                "Select time within selected playback time")),
+                                      );
+                                    }
+                                  }
+                                  setState(() {
+                                    isSkipLoading = false;
+                                  });
+                                } else {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text("No time provided")),
+                                    );
+                                  }
+                                }
+                              },
+                              child: const Text('Skip To'),
+                            ))
                 ],
               ),
             ),

@@ -128,7 +128,7 @@ abstract class DomCameraPlatform extends PlatformInterface {
     throw UnimplementedError('rePlayPlayBack() has not been implemented.');
   }
 
-  Map<String, dynamic> skipPlayBack(int skipTime) {
+  Future<Map<String, dynamic>> skipPlayBack(int hour, int minute, int sec) {
     throw UnimplementedError('skipPlayBack() has not been implemented.');
   }
 

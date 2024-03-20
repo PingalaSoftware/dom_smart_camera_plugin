@@ -725,7 +725,6 @@ public class DomCameraPlugin
                 Result tempResult = getResultAndClear("SET_HUMAN_DETECTION");
                 tempResult.success(dataList);
               }
-              result.success(dataList);
             }
 
             public void onFailed(String errorId, String message) {
@@ -871,10 +870,10 @@ public class DomCameraPlugin
         PlayBackClass.stopPlayBack();
         break;
       case PLAY_FROM_POSITION:
-//        if (isResultAvailable("PLAY_FROM_POSITION")) {
-//          result.error("0", "Request is in progress", null);
-//          break;
-//        }
+        //        if (isResultAvailable("PLAY_FROM_POSITION")) {
+        //          result.error("0", "Request is in progress", null);
+        //          break;
+        //        }
         storeResult("PLAY_FROM_POSITION", result);
 
         position = call.argument("position");
@@ -911,16 +910,17 @@ public class DomCameraPlugin
         cameraId = call.argument("cameraId");
 
         PlayBackClass.downloadVideoFile(
-                position,
-                cameraId,
-                eventSink,
-                new DeviceClass.myDomResultInterface() {
+          position,
+          cameraId,
+          eventSink,
+          new DeviceClass.myDomResultInterface() {
             public void onSuccess(List<String> dataList) {
               if (isResultAvailable("DOWNLOAD_FROM_POSITION")) {
                 Result tempResult = getResultAndClear("DOWNLOAD_FROM_POSITION");
                 tempResult.success(dataList);
               }
             }
+
             public void onFailed(String errorId, String message) {
               if (isResultAvailable("DOWNLOAD_FROM_POSITION")) {
                 Result tempResult = getResultAndClear("DOWNLOAD_FROM_POSITION");
@@ -938,7 +938,20 @@ public class DomCameraPlugin
         break;
       case PB_SKIP_TIME:
         int skipTime = call.argument("skipTime");
-        PlayBackClass.seekToTime(skipTime);
+        PlayBackClass.seekToTime(
+          skipTime,
+          new DeviceClass.myDomResultInterface() {
+            @Override
+            public void onSuccess(List<String> dataList) {
+              result.success(dataList);
+            }
+
+            @Override
+            public void onFailed(String errorId, String message) {
+              result.error(errorId, message, null);
+            }
+          }
+        );
         break;
       case PB_OPEN_SOUND:
         PlayBackClass.openVoiceBySoundPlayback();

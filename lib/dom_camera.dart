@@ -174,18 +174,8 @@ class DomCamera {
     return DomCameraPlatform.instance.rePlayPlayBack();
   }
 
-  Map<String, dynamic> skipPlayBack(int hour, int minute, int sec) {
-    if (hour > 24) return {"isError": true, "message": "Invalid Hour"};
-    if (minute > 60) return {"isError": true, "message": "Invalid Minute"};
-    if (sec > 60) return {"isError": true, "message": "Invalid Second"};
-
-    DateTime now = DateTime.now();
-    DateTime startOfToday = DateTime(now.year, now.month, now.day, 00, 00, 00);
-    DateTime curTime =
-        DateTime(now.year, now.month, now.day, hour, minute, sec);
-    int skipTime = curTime.difference(startOfToday).inSeconds;
-
-    return DomCameraPlatform.instance.skipPlayBack(skipTime);
+  Future<Map<String, dynamic>> skipPlayBack(int hour, int minute, int sec) {
+    return DomCameraPlatform.instance.skipPlayBack(hour, minute, sec);
   }
 
   Map<String, dynamic> openAudioPlayBack() {

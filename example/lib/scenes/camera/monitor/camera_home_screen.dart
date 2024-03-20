@@ -1,12 +1,12 @@
-import 'dart:math';
-
 import 'package:dom_camera/dom_camera.dart';
-import 'package:dom_camera_example/scenes/camera/monitor/camera_options_screen_1.dart';
+import 'package:dom_camera_example/components/button.dart';
 import 'package:dom_camera_example/scenes/camera/monitor/camera_options_screen_2.dart';
 import 'package:dom_camera_example/scenes/camera/monitor/camera_options_screen_3.dart';
 import 'package:dom_camera_example/scenes/camera/monitor/camera_options_screen_4.dart';
 import 'package:dom_camera_example/scenes/camera/monitor/camera_options_screen_5.dart';
 import 'package:dom_camera_example/scenes/camera/monitor/camera_options_screen_6.dart';
+import 'package:dom_camera_example/scenes/camera/monitor/options/main_stream_audio_control.dart';
+import 'package:dom_camera_example/scenes/camera/monitor/options/preset_point.dart';
 import 'package:dom_camera_example/utils/constants.dart';
 import 'package:dom_camera_example/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +31,13 @@ class _CameraHomeScreenState extends State<CameraHomeScreen>
   bool isLiveStreamError = false;
   bool isFullScreen = false;
 
+  // NEW START
+  bool _isLiveView = false;
+  bool _isLoading = false;
+  late VoidCallback onStreamError;
+  bool isFirstTime = true;
+  // NEW END
+
   @override
   void dispose() async {
     _domCameraPlugin.stopStreaming();
@@ -45,7 +52,65 @@ class _CameraHomeScreenState extends State<CameraHomeScreen>
 
     WidgetsBinding.instance.addObserver(this);
     // _enableFullScreenAndLandscape();
+
+    // NEW START
+    _startLiveView();
+
+    eventBus.on<StopLiveStreamEvent>().listen((event) {
+      if (!_isLiveView) return;
+      _domCameraPlugin.stopStreaming();
+
+      _stopLiveView();
+    });
+    // NEW END
   }
+
+  // NEW START
+  void _startLiveView() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final data = await _domCameraPlugin.startStreaming();
+
+    if (data["isError"]) {
+      onStreamError();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data["message"])),
+        );
+      }
+      return;
+    }
+
+    if (isFirstTime) {
+      setState(() {
+        isFirstTime = false;
+      });
+      _domCameraPlugin.stopStreaming();
+      Future.delayed(
+          const Duration(milliseconds: 800), () => {_startLiveView()});
+      return;
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    setState(() {
+      _isLiveView = true;
+    });
+  }
+
+  void _stopLiveView() {
+    if (!_isLiveView) return;
+    _domCameraPlugin.stopStreaming();
+
+    setState(() {
+      _isLiveView = false;
+    });
+  }
+  // NEW END
 
   void _enableFullScreenAndLandscape() {
     _domCameraPlugin.stopStreaming();
@@ -84,7 +149,13 @@ class _CameraHomeScreenState extends State<CameraHomeScreen>
       child: Scaffold(
         appBar: CustomAppBar(
           onBackButtonPressed: () {
-            _restoreSystemSettings();
+            if (isFullScreen) {
+              setState(() {
+                isFullScreen = false;
+              });
+              _restoreSystemSettings();
+              return;
+            }
             Navigator.of(context).pop();
           },
           title: 'Camera Home Screen $cameraId',
@@ -92,7 +163,12 @@ class _CameraHomeScreenState extends State<CameraHomeScreen>
             CustomAppBarAction(
               icon: Icons.settings,
               callback: () {
-                _restoreSystemSettings();
+                if (isFullScreen) {
+                  setState(() {
+                    isFullScreen = false;
+                  });
+                  _restoreSystemSettings();
+                }
                 eventBus.fire(StopLiveStreamEvent());
 
                 Navigator.pushNamed(
@@ -111,77 +187,73 @@ class _CameraHomeScreenState extends State<CameraHomeScreen>
                       ? MainAxisAlignment.center
                       : MainAxisAlignment.start,
                   children: [
-                    // Transform.rotate(
-                    //   angle: isFullScreen ? -pi / 2 : 0,
-                    //   child:
                     SizedBox(
                       height: isFullScreen
                           ? MediaQuery.of(context).size.height - 60
                           : 240,
-                      // width: isFullScreen
-                      //     ? MediaQuery.of(context).size.width
-                      //     : MediaQuery.of(context).size.height,
                       child: DecoratedBox(
-                        decoration:
-                            const BoxDecoration(color: Colors.redAccent),
+                        decoration: const BoxDecoration(color: Colors.black),
                         child: _domCameraPlugin.cameraStreamWidget(),
                       ),
                     ),
-                    // ),
                     if (!isFullScreen)
                       Expanded(
                         child: SingleChildScrollView(
                           child: Column(
                             children: [
-                              const SizedBox(height: 18),
-                              Row(
-                                children: [
-                                  TextButton(
-                                    onPressed: () async {
-                                      final data = await _domCameraPlugin
-                                          .isFullScreenStreaming();
-                                      print("isFullScreenStreaming: $data");
-                                    },
-                                    child: const Text("Get Streaming state"),
-                                  ),
-                                  TextButton(
-                                    onPressed: () =>
-                                        _domCameraPlugin.showFullScreenStream(),
-                                    child: const Text("Expand"),
-                                  ),
-                                  TextButton(
-                                    onPressed: () =>
-                                        _domCameraPlugin.stopFullScreenStream(),
-                                    child: const Text("Fit"),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        isFullScreen = true;
-                                      });
-                                      _enableFullScreenAndLandscape();
-                                      // eventBus.fire(StopLiveStreamEvent());
-
-                                      // Future.delayed(
-                                      //     const Duration(milliseconds: 1000), () {
-                                      //   Navigator.pushNamed(
-                                      //     context,
-                                      //     ScreenRoutes.cameraFullScreen,
-                                      //   );
-                                      // });
-                                    },
-                                    child: const Text("FullScreen"),
-                                  ),
-                                ],
-                              ),
                               const SizedBox(height: 15),
-                              CameraOptionScreen1(
-                                cameraId: cameraId,
-                                onStreamError: () {
-                                  setState(() {
-                                    isLiveStreamError = true;
-                                  });
-                                },
+                              Container(
+                                constraints: BoxConstraints(
+                                    maxWidth:
+                                        MediaQuery.of(context).size.width),
+                                padding: const EdgeInsets.only(
+                                    left: 10.0, bottom: 8.0, right: 10.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    MainStreamAudioControl(cameraId: cameraId),
+                                    const PresetPoint(),
+                                    TextButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          isFullScreen = true;
+                                        });
+                                        _enableFullScreenAndLandscape();
+                                      },
+                                      child: const Text("FS"),
+                                    ),
+                                    Expanded(
+                                      child: Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 4.0),
+                                        child: GestureDetector(
+                                          onTap: _isLiveView
+                                              ? _stopLiveView
+                                              : _startLiveView,
+                                          child: _isLoading
+                                              ? const SizedBox(
+                                                  height: 50,
+                                                  width: 80,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    color: Colors.red,
+                                                  ))
+                                              : OptionsButton(
+                                                  text: _isLiveView
+                                                      ? "STOP LIVE STREAM"
+                                                      : "SHOW LIVE STREAM",
+                                                  size: 50,
+                                                  textColor: Colors.white,
+                                                  backgroundColor: _isLiveView
+                                                      ? Colors.red
+                                                      : Colors.green,
+                                                ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                               const SizedBox(height: 18),
                               CameraOptionScreen2(cameraId: cameraId),

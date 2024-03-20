@@ -1,127 +1,134 @@
-import 'package:dom_camera/dom_camera.dart';
-import 'package:dom_camera_example/components/button.dart';
-import 'package:dom_camera_example/scenes/camera/monitor/options/main_stream_audio_control.dart';
-import 'package:dom_camera_example/scenes/camera/monitor/options/preset_point.dart';
-import 'package:dom_camera_example/utils/event_bus.dart';
-import 'package:flutter/material.dart';
+// import 'package:dom_camera/dom_camera.dart';
+// import 'package:dom_camera_example/components/button.dart';
+// import 'package:dom_camera_example/scenes/camera/monitor/options/main_stream_audio_control.dart';
+// import 'package:dom_camera_example/scenes/camera/monitor/options/preset_point.dart';
+// import 'package:dom_camera_example/utils/event_bus.dart';
+// import 'package:flutter/material.dart';
 
-class CameraOptionScreen1 extends StatefulWidget {
-  final String cameraId;
-  final VoidCallback onStreamError;
+// class CameraOptionScreen1 extends StatefulWidget {
+//   final String cameraId;
+//   final VoidCallback onStreamError;
+//   final TextButton fullScreenWidget;
 
-  const CameraOptionScreen1(
-      {required this.cameraId, required this.onStreamError, Key? key})
-      : super(key: key);
+//   const CameraOptionScreen1({
+//     required this.cameraId,
+//     required this.onStreamError,
+//     required this.fullScreenWidget,
+//     Key? key,
+//   }) : super(key: key);
 
-  @override
-  State<CameraOptionScreen1> createState() => _CameraOptionScreen1State();
-}
+//   @override
+//   State<CameraOptionScreen1> createState() => _CameraOptionScreen1State();
+// }
 
-class _CameraOptionScreen1State extends State<CameraOptionScreen1> {
-  final _domCameraPlugin = DomCamera();
+// class _CameraOptionScreen1State extends State<CameraOptionScreen1> {
+//   final _domCameraPlugin = DomCamera();
+//   late TextButton fullScreenWidget;
 
-  late String cameraId;
-  bool _isLiveView = false;
-  bool _isLoading = false;
-  late VoidCallback onStreamError;
+//   late String cameraId;
+//   bool _isLiveView = false;
+//   bool _isLoading = false;
+//   late VoidCallback onStreamError;
 
-  bool isFirstTime = true;
-  @override
-  void initState() {
-    super.initState();
-    cameraId = widget.cameraId;
-    onStreamError = widget.onStreamError;
-    _startLiveView();
+//   bool isFirstTime = true;
+//   @override
+//   void initState() {
+//     super.initState();
+//     cameraId = widget.cameraId;
+//     onStreamError = widget.onStreamError;
+//     fullScreenWidget = widget.fullScreenWidget;
+//     _startLiveView();
 
-    eventBus.on<StopLiveStreamEvent>().listen((event) {
-      if (!_isLiveView) return;
-      _domCameraPlugin.stopStreaming();
+//     eventBus.on<StopLiveStreamEvent>().listen((event) {
+//       if (!_isLiveView) return;
+//       _domCameraPlugin.stopStreaming();
 
-      _stopLiveView();
-    });
-  }
+//       _stopLiveView();
+//     });
+//   }
 
-  void _startLiveView() async {
-    setState(() {
-      _isLoading = true;
-    });
+//   void _startLiveView() async {
+//     setState(() {
+//       _isLoading = true;
+//     });
 
-    final data = await _domCameraPlugin.startStreaming();
+//     final data = await _domCameraPlugin.startStreaming();
 
-    if (data["isError"]) {
-      onStreamError();
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data["message"])),
-        );
-      }
-      return;
-    }
+//     if (data["isError"]) {
+//       onStreamError();
+//       if (context.mounted) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(content: Text(data["message"])),
+//         );
+//       }
+//       return;
+//     }
 
-    if (isFirstTime) {
-      setState(() {
-        isFirstTime = false;
-      });
-      _domCameraPlugin.stopStreaming();
-      Future.delayed(
-          const Duration(milliseconds: 800), () => {_startLiveView()});
-      return;
-    }
+//     if (isFirstTime) {
+//       setState(() {
+//         isFirstTime = false;
+//       });
+//       _domCameraPlugin.stopStreaming();
+//       Future.delayed(
+//           const Duration(milliseconds: 800), () => {_startLiveView()});
+//       return;
+//     }
 
-    setState(() {
-      _isLoading = false;
-    });
+//     setState(() {
+//       _isLoading = false;
+//     });
 
-    setState(() {
-      _isLiveView = true;
-    });
-  }
+//     setState(() {
+//       _isLiveView = true;
+//     });
+//   }
 
-  void _stopLiveView() {
-    if (!_isLiveView) return;
-    _domCameraPlugin.stopStreaming();
+//   void _stopLiveView() {
+//     if (!_isLiveView) return;
+//     _domCameraPlugin.stopStreaming();
 
-    setState(() {
-      _isLiveView = false;
-    });
-  }
+//     setState(() {
+//       _isLiveView = false;
+//     });
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
-      padding: const EdgeInsets.only(left: 10.0, bottom: 8.0, right: 10.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          MainStreamAudioControl(cameraId: cameraId),
-          const PresetPoint(),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 4.0),
-              child: GestureDetector(
-                onTap: _isLiveView ? _stopLiveView : _startLiveView,
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 50,
-                        width: 80,
-                        child: CircularProgressIndicator(
-                          color: Colors.red,
-                        ))
-                    : OptionsButton(
-                        text: _isLiveView
-                            ? "STOP LIVE STREAM"
-                            : "SHOW LIVE STREAM",
-                        size: 50,
-                        textColor: Colors.white,
-                        backgroundColor:
-                            _isLiveView ? Colors.red : Colors.green,
-                      ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
+//       padding: const EdgeInsets.only(left: 10.0, bottom: 8.0, right: 10.0),
+//       child: Row(
+//         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//         children: [
+//           MainStreamAudioControl(cameraId: cameraId),
+//           const PresetPoint(),
+//           fullScreenWidget,
+//           Expanded(
+//             child: Padding(
+//               padding: const EdgeInsets.only(left: 4.0),
+//               child: GestureDetector(
+//                 onTap: _isLiveView ? _stopLiveView : _startLiveView,
+//                 child: _isLoading
+//                     ? const SizedBox(
+//                         height: 50,
+//                         width: 80,
+//                         child: CircularProgressIndicator(
+//                           color: Colors.red,
+//                         ))
+//                     : OptionsButton(
+//                         text: _isLiveView
+//                             ? "STOP LIVE STREAM"
+//                             : "SHOW LIVE STREAM",
+//                         size: 50,
+//                         textColor: Colors.white,
+//                         backgroundColor:
+//                             _isLiveView ? Colors.red : Colors.green,
+//                       ),
+//               ),
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
