@@ -16,6 +16,8 @@ For video playback
 
 #### addCamera(String wifiSsid, String wifiPassword)
 
+#### cameraState(String cameraId) `OFF_LINE, ON_LINE, SLEEP, WAKE_UP, WAKE, SLEEP_UNWAKE, PREPARE_SLEEP`
+
 #### cameraLogin(String cameraId)
 
 #### setDeviceAlarmCallback(String callbackUrl)

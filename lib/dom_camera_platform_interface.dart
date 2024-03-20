@@ -13,6 +13,11 @@ abstract class DomCameraPlatform extends PlatformInterface {
     _instance = instance;
   }
 
+  Future<Map<String, dynamic>> iosNetworkPermission() {
+    throw UnimplementedError(
+        'iosNetworkPermission() has not been implemented.');
+  }
+
   Future<Map<String, dynamic>> addCamera(String wifiSsid, String wifiPassword) {
     throw UnimplementedError('addCamera() has not been implemented.');
   }
@@ -21,18 +26,39 @@ abstract class DomCameraPlatform extends PlatformInterface {
     throw UnimplementedError('cameraLogin() has not been implemented.');
   }
 
+  Future<Map<String, dynamic>> getCameraName() {
+    throw UnimplementedError('getCameraName() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> setCameraName(String newName) {
+    throw UnimplementedError('setCameraName() has not been implemented.');
+  }
+
   Future<Map<String, dynamic>> setDeviceAlarmCallback(
       String callbackUrl, String? cameraId) {
     throw UnimplementedError(
         'setDeviceAlarmCallback() has not been implemented.');
   }
 
-  // Future<Map<String, dynamic>> cameraState(String cameraId) {
-  //   throw UnimplementedError('cameraState() has not been implemented.');
-  // }
+  Future<Map<String, dynamic>> cameraState(String cameraId) {
+    throw UnimplementedError('cameraState() has not been implemented.');
+  }
 
   Future<Map<String, dynamic>> setHumanDetection(bool isEnabled) {
     throw UnimplementedError('setHumanDetection() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> setRecordType(String type) {
+    throw UnimplementedError('setRecordType() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> isFullScreenStreaming() {
+    throw UnimplementedError(
+        'isFullScreenStreaming() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> fullScreenStream(bool isShowFullScreenStream) {
+    throw UnimplementedError('fullScreenStream() has not been implemented.');
   }
 
   Future<Map<String, dynamic>> cameraStream(bool isShowStream) {
@@ -71,12 +97,21 @@ abstract class DomCameraPlatform extends PlatformInterface {
   }
 
   Future<Map<String, dynamic>> playbackList(
-      String date, String month, String year) {
-    throw UnimplementedError(
-        'playbackList(String date, String month, String year) has not been implemented.');
+    String fromDate,
+    String fromMonth,
+    String fromYear,
+    String toDate,
+    String toMonth,
+    String toYear,
+  ) {
+    throw UnimplementedError('playbackList() has not been implemented.');
   }
 
-  Map<String, dynamic> playFromPosition(int position) {
+  Map<String, dynamic> stopPlayBack() {
+    throw UnimplementedError('stopPlayBack() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> playFromPosition(int position) {
     throw UnimplementedError('playFromPosition() has not been implemented.');
   }
 
@@ -93,7 +128,7 @@ abstract class DomCameraPlatform extends PlatformInterface {
     throw UnimplementedError('rePlayPlayBack() has not been implemented.');
   }
 
-  Map<String, dynamic> skipPlayBack(int skipTime) {
+  Future<Map<String, dynamic>> skipPlayBack(int hour, int minute, int sec) {
     throw UnimplementedError('skipPlayBack() has not been implemented.');
   }
 
@@ -108,5 +143,40 @@ abstract class DomCameraPlatform extends PlatformInterface {
   Map<String, dynamic> captureImageFromPlayBack() {
     throw UnimplementedError(
         'captureImageFromPlayBack() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> addCameraWithSerialNumber(
+      String cameraId, String cameraType) {
+    throw UnimplementedError(
+        'addCameraWithSerialNumber() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> getUserInformation(String cameraId) {
+    throw UnimplementedError('getUserInformation() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> addPresetPoint(int presetId) {
+    throw UnimplementedError('addPresetPoint() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> turnToPreset(int presetId) {
+    throw UnimplementedError('turnToPreset() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> getConfiguration(String type) {
+    throw UnimplementedError('getConfiguration() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> setConfiguration(String type, String newConfig) {
+    throw UnimplementedError('setConfiguration() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> getWifiInfo() {
+    throw UnimplementedError('getWifiInfo() has not been implemented.');
+  }
+
+  Future<Map<String, dynamic>> getBatteryPercentage() {
+    throw UnimplementedError(
+        'getBatteryPercentage() has not been implemented.');
   }
 }

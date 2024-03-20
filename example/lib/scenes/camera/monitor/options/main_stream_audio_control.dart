@@ -34,6 +34,7 @@ class _MainStreamAudioControlState extends State<MainStreamAudioControl> {
           else
             enableAudioInterCom()
         });
+    // enableAudioInterCom();
   }
 
   void enableAudioInterCom() {

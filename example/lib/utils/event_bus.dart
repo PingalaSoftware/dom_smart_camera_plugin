@@ -5,3 +5,15 @@ EventBus eventBus = EventBus();
 class StopLiveStreamEvent {
   StopLiveStreamEvent();
 }
+
+class PausePlayBackEvent {
+  PausePlayBackEvent();
+}
+
+class PlayPlayBackEvent {
+  PlayPlayBackEvent();
+}
+
+class SeekToPositionPlayback {
+  SeekToPositionPlayback(DateTime currentTime);
+}

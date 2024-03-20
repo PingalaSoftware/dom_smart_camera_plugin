@@ -10,6 +10,9 @@
 .svn/
 migrate_working_dir/
 
+
+cam_test_new
+
 # IntelliJ related
 *.iml
 *.ipr

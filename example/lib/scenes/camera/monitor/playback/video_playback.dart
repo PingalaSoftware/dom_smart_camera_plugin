@@ -1,5 +1,7 @@
 import 'package:dom_camera/dom_camera.dart';
+import 'package:dom_camera_example/components/button.dart';
 import 'package:dom_camera_example/scenes/camera/monitor/options/playback_time_widget.dart';
+import 'package:dom_camera_example/scenes/camera/monitor/playback/time_range_seekbar.dart';
 import 'package:dom_camera_example/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -15,15 +17,21 @@ class VideoPlayback extends StatefulWidget {
 
 class _VideoPlaybackState extends State<VideoPlayback> {
   final _domCameraPlugin = DomCamera();
-  DateTime selectedDate = DateTime.now();
+  DateTime selectedDateFrom = DateTime.now();
+  DateTime selectedDateTo = DateTime.now();
 
   late String cameraId;
   List<List<String>> dataList = [];
-  bool isLoading = true;
+  bool isListLoading = true;
+  bool isSkipLoading = false;
   String startTime = "";
   String endTime = "";
   bool isPlaying = false;
   bool isMuted = true;
+
+  bool isMainPlaybackLoading = false;
+
+  bool isPlaybackLoading = false;
 
   @override
   void initState() {
@@ -31,15 +39,38 @@ class _VideoPlaybackState extends State<VideoPlayback> {
 
     cameraId = widget.cameraId;
 
-    String formattedDate = DateFormat('dd').format(selectedDate);
-    String formattedMonth = DateFormat('MM').format(selectedDate);
-    String formattedYear = DateFormat('yyyy').format(selectedDate);
+    String formattedDateFrom = DateFormat('dd').format(selectedDateFrom);
+    String formattedMonthFrom = DateFormat('MM').format(selectedDateFrom);
+    String formattedYearFrom = DateFormat('yyyy').format(selectedDateFrom);
 
-    getPlayBackList(formattedDate, formattedMonth, formattedYear);
+    String formattedDateTo = DateFormat('dd').format(selectedDateTo);
+    String formattedMonthTo = DateFormat('MM').format(selectedDateTo);
+    String formattedYearTo = DateFormat('yyyy').format(selectedDateTo);
+
+    getPlayBackList(
+      formattedDateFrom,
+      formattedMonthFrom,
+      formattedYearFrom,
+      formattedDateTo,
+      formattedMonthTo,
+      formattedYearTo,
+    );
   }
 
-  getPlayBackList(String date, String month, String year) async {
-    final result = await _domCameraPlugin.playbackList(date, month, year);
+  @override
+  void dispose() {
+    _domCameraPlugin.stopPlayBack();
+
+    super.dispose();
+  }
+
+  getPlayBackList(String dateFrom, String monthFrom, String yearFrom,
+      String dateTo, String monthTo, String yearTo) async {
+    setState(() {
+      isListLoading = true;
+    });
+    final result = await _domCameraPlugin.playbackList(
+        dateFrom, monthFrom, yearFrom, dateTo, monthTo, yearTo);
 
     if (result["isError"]) {
       if (context.mounted) {
@@ -49,7 +80,7 @@ class _VideoPlaybackState extends State<VideoPlayback> {
       }
       setState(() {
         dataList = [];
-        isLoading = false;
+        isListLoading = false;
       });
       return;
     }
@@ -62,36 +93,57 @@ class _VideoPlaybackState extends State<VideoPlayback> {
 
       setState(() {
         dataList = stringList;
-        isLoading = false;
+        isListLoading = false;
         startTime = dataList[0][0];
         endTime = dataList[stringList.length - 1][1];
       });
     } else {
       setState(() {
         dataList = [];
-        isLoading = false;
+        isListLoading = false;
       });
     }
   }
 
-  Future<void> _selectDate(BuildContext context) async {
+  Future<void> _selectDateFrom(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: selectedDate,
+      initialDate: selectedDateFrom,
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
     );
-    if (picked != null && picked != selectedDate) {
+    if (picked != null && picked != selectedDateFrom) {
       setState(() {
-        selectedDate = picked;
+        selectedDateFrom = picked;
       });
-
-      String formattedDate = DateFormat('dd').format(picked);
-      String formattedMonth = DateFormat('MM').format(picked);
-      String formattedYear = DateFormat('yyyy').format(picked);
-
-      getPlayBackList(formattedDate, formattedMonth, formattedYear);
     }
+  }
+
+  Future<void> _selectDateTo(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDateTo,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != selectedDateTo) {
+      setState(() {
+        selectedDateTo = picked;
+      });
+    }
+  }
+
+  void getListBasedOnDate() async {
+    String formattedDateFrom = DateFormat('dd').format(selectedDateFrom);
+    String formattedMonthFrom = DateFormat('MM').format(selectedDateFrom);
+    String formattedYearFrom = DateFormat('yyyy').format(selectedDateFrom);
+
+    String formattedDateTo = DateFormat('dd').format(selectedDateTo);
+    String formattedMonthTo = DateFormat('MM').format(selectedDateTo);
+    String formattedYearTo = DateFormat('yyyy').format(selectedDateTo);
+
+    getPlayBackList(formattedDateFrom, formattedMonthFrom, formattedYearFrom,
+        formattedDateTo, formattedMonthTo, formattedYearTo);
   }
 
   Duration calculateTimeDifference(String startTime, String endTime) {
@@ -100,9 +152,16 @@ class _VideoPlaybackState extends State<VideoPlayback> {
     return endDateTime.difference(startDateTime);
   }
 
-  void onItemClick(List<String> item, int index) {
-    final result = _domCameraPlugin.playFromPosition(index);
-
+  void onItemClick(List<String> item, int index) async {
+    setState(() {
+      isPlaybackLoading = true;
+      startTime = item[0];
+      endTime = item[1];
+    });
+    final result = await _domCameraPlugin.playFromPosition(index);
+    setState(() {
+      isPlaybackLoading = false;
+    });
     if (result["isError"]) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -138,12 +197,6 @@ class _VideoPlaybackState extends State<VideoPlayback> {
                   child: TextButton(
                     onPressed: () async {
                       await _domCameraPlugin.downloadFromPosition(index);
-
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Download Completed!")),
-                        );
-                      }
                     },
                     child: const Icon(Icons.download),
                   ),
@@ -162,7 +215,9 @@ class _VideoPlaybackState extends State<VideoPlayback> {
 
   @override
   Widget build(BuildContext context) {
-    String formattedDate = DateFormat('dd-MM-yyyy').format(selectedDate);
+    String formattedDateFrom =
+        DateFormat('dd-MM-yyyy').format(selectedDateFrom);
+    String formattedDateTo = DateFormat('dd-MM-yyyy').format(selectedDateTo);
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -178,10 +233,14 @@ class _VideoPlaybackState extends State<VideoPlayback> {
                 child: _domCameraPlugin.videoPlaybackWidget(),
               ),
             ),
+            const SizedBox(height: 20),
+            const TimeRangeSeekBar(),
+            const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Row(
                 children: [
+                  if (isPlaybackLoading) const CircularProgressIndicator(),
                   IconButton(
                     icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
                     onPressed: () {
@@ -238,37 +297,125 @@ class _VideoPlaybackState extends State<VideoPlayback> {
                       }
                     },
                   ),
-                  const Expanded(child: PlaybackTimeWidget())
+                  Expanded(
+                      child: isSkipLoading
+                          ? const CircularProgressIndicator()
+                          : ElevatedButton(
+                              onPressed: () async {
+                                DateTime startTimeTemp =
+                                    DateTime.parse(startTime);
+                                DateTime endTimeTemp = DateTime.parse(endTime);
+
+                                final pickedTime = await showTimePicker(
+                                  context: context,
+                                  initialTime: TimeOfDay.now(),
+                                  hourLabelText:
+                                      "Hour: [${startTimeTemp.hour == endTimeTemp.hour ? "${startTimeTemp.hour}" : "${startTimeTemp.hour} -${endTimeTemp.hour}"}]",
+                                  minuteLabelText:
+                                      "Minute: [${startTimeTemp.minute} -${endTimeTemp.minute}]",
+                                  helpText:
+                                      "Select time within $startTime - $endTime",
+                                  initialEntryMode:
+                                      TimePickerEntryMode.inputOnly,
+                                );
+
+                                if (pickedTime != null) {
+                                  setState(() {
+                                    isSkipLoading = true;
+                                  });
+
+                                  DateTime pickedDateTime = DateTime(
+                                    startTimeTemp.year,
+                                    startTimeTemp.month,
+                                    startTimeTemp.day,
+                                    pickedTime.hour,
+                                    pickedTime.minute,
+                                  );
+
+                                  if (pickedDateTime.isAfter(startTimeTemp) &&
+                                      pickedDateTime.isBefore(endTimeTemp)) {
+                                    await _domCameraPlugin.skipPlayBack(
+                                        pickedTime.hour, pickedTime.minute, 00);
+                                  } else {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                "Select time within selected playback time")),
+                                      );
+                                    }
+                                  }
+                                  setState(() {
+                                    isSkipLoading = false;
+                                  });
+                                } else {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text("No time provided")),
+                                    );
+                                  }
+                                }
+                              },
+                              child: const Text('Skip To'),
+                            ))
                 ],
               ),
             ),
             const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Text(
-                  formattedDate,
-                  style: const TextStyle(
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Theme.of(context).primaryColor),
+                borderRadius: BorderRadius.circular(3),
+              ),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10),
+              child: Column(
+                children: [
+                  const Text("Select from and to date"),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        InkWell(
+                          onTap: () => _selectDateFrom(context),
+                          child: Text(
+                            formattedDateFrom,
+                            style: const TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const Text("  -  "),
+                        InkWell(
+                          onTap: () => _selectDateTo(context),
+                          child: Text(
+                            formattedDateTo,
+                            style: const TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        InkWell(
+                          onTap: () => getListBasedOnDate(),
+                          child: const OptionsButton(
+                            text: "Go",
+                            size: 50,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                InkWell(
-                  onTap: () => _selectDate(context),
-                  child: const Icon(
-                    Icons.calendar_today,
-                    size: 30.0,
-                    color: Colors.blue,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(height: 10),
-            const Text("List"),
-            isLoading
-                ? const Text("Empty list")
-                : Text("Start Time: $startTime, End Time: $endTime"),
-            isLoading
+            isListLoading
                 ? const CircularProgressIndicator()
                 : dataList.isEmpty
                     ? const Text("No Playbacks Found")

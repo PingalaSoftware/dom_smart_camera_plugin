@@ -2,17 +2,17 @@ import 'package:dom_camera/dom_camera.dart';
 import 'package:dom_camera_example/components/button.dart';
 import 'package:flutter/material.dart';
 
-class CameraOptionScreen4 extends StatefulWidget {
+class CameraOptionScreen6 extends StatefulWidget {
   final String cameraId;
 
-  const CameraOptionScreen4({required this.cameraId, Key? key})
+  const CameraOptionScreen6({required this.cameraId, Key? key})
       : super(key: key);
 
   @override
-  State<CameraOptionScreen4> createState() => _CameraOptionScreen4State();
+  State<CameraOptionScreen6> createState() => _CameraOptionScreen6State();
 }
 
-class _CameraOptionScreen4State extends State<CameraOptionScreen4> {
+class _CameraOptionScreen6State extends State<CameraOptionScreen6> {
   final _domCameraPlugin = DomCamera();
   late String cameraId;
   bool isFunctionInProgress = false;
@@ -23,7 +23,7 @@ class _CameraOptionScreen4State extends State<CameraOptionScreen4> {
     cameraId = widget.cameraId;
   }
 
-  Future<void> toggleHumanDetection(bool enable) async {
+  Future<void> updateRecordConfigurationType(recordType) async {
     if (isFunctionInProgress) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -39,7 +39,7 @@ class _CameraOptionScreen4State extends State<CameraOptionScreen4> {
       isFunctionInProgress = true;
     });
 
-    final data = await _domCameraPlugin.setHumanDetection(enable);
+    final data = await _domCameraPlugin.setRecordType(recordType);
     if (data["isError"]) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -49,8 +49,8 @@ class _CameraOptionScreen4State extends State<CameraOptionScreen4> {
     } else {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Human detection set to: ${enable ? 'ON' : 'OFF'}"),
+          const SnackBar(
+            content: Text("Record Setting updated"),
           ),
         );
       }
@@ -80,18 +80,18 @@ class _CameraOptionScreen4State extends State<CameraOptionScreen4> {
           const Expanded(
             child: Padding(
               padding: EdgeInsets.only(right: 8.0),
-              child: Text("Human Detection: "),
+              child: Text("Video Recording: "),
             ),
           ),
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: GestureDetector(
               onTap: () async {
-                await toggleHumanDetection(true);
+                await updateRecordConfigurationType("ALWAYS");
               },
               child: OptionsButton(
-                text: "ON",
-                size: 50,
+                text: "Always",
+                size: 60,
                 textColor: Theme.of(context).primaryColor,
                 backgroundColor: Theme.of(context).secondaryHeaderColor,
               ),
@@ -101,11 +101,25 @@ class _CameraOptionScreen4State extends State<CameraOptionScreen4> {
             padding: const EdgeInsets.only(right: 8.0),
             child: GestureDetector(
               onTap: () async {
-                await toggleHumanDetection(false);
+                await updateRecordConfigurationType("NEVER");
               },
               child: OptionsButton(
-                text: "OFF",
-                size: 50,
+                text: "Never",
+                size: 60,
+                textColor: Theme.of(context).primaryColor,
+                backgroundColor: Theme.of(context).secondaryHeaderColor,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: GestureDetector(
+              onTap: () async {
+                await updateRecordConfigurationType("ALARM");
+              },
+              child: OptionsButton(
+                text: "Alarm",
+                size: 60,
                 textColor: Theme.of(context).primaryColor,
                 backgroundColor: Theme.of(context).secondaryHeaderColor,
               ),

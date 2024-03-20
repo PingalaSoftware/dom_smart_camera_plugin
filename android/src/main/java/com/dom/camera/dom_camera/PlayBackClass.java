@@ -4,7 +4,9 @@ import static com.manager.db.Define.DOWNLOAD_VIDEO_BY_FILE;
 import static com.manager.device.media.MediaManager.PLAY_DEV_PLAYBACK;
 
 import android.os.Environment;
+import android.view.View;
 import android.view.ViewGroup;
+import com.google.gson.Gson;
 import com.lib.FunSDK;
 import com.lib.MsgContent;
 import com.lib.sdk.struct.H264_DVR_FILE_DATA;
@@ -18,10 +20,16 @@ import com.manager.device.media.playback.RecordManager;
 import com.utils.FileUtils;
 import com.utils.TimeUtils;
 import com.xm.ui.widget.XMRecyclerView;
+import io.flutter.plugin.common.EventChannel.EventSink;
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PlayBackClass {
 
@@ -30,36 +38,80 @@ public class PlayBackClass {
   DeviceManager deviceManager = DeviceManager.getInstance();
   static RecordManager recordManager;
   static List<H264_DVR_FILE_DATA> dataList;
-  static String date;
-  static String month;
-  static String year;
+  static String fromDate;
+  static String fromMonth;
+  static String fromYear;
+  static String toDate;
+  static String toMonth;
+  static String toYear;
+  static boolean isStartPlaybackCalled = false;
+  static DeviceClass.myDomResultInterface resultCallback;
+  static Calendar playBackEndTime;
+
+  static EventSink eventSink;
 
   public static void downloadVideoFile(
     int position,
     String deviceId,
+    EventSink eventSinkCB,
     DeviceClass.myDomResultInterface result
   ) {
     if (dataList == null || position >= dataList.size()) {
       return;
     }
+    eventSink = eventSinkCB;
 
-    String galleryPath =
+    String storagePath =
       Environment.getExternalStorageDirectory() +
       File.separator +
       Environment.DIRECTORY_DCIM +
       File.separator +
-      "Camera" +
+      "DOM" +
+      File.separator +
+      "PB_VIDEOS" +
       File.separator;
 
-    if (!FileUtils.isFileAvailable(galleryPath)) {
-      galleryPath =
+    File domFolder = new File(
+      Environment.getExternalStorageDirectory() +
+      File.separator +
+      Environment.DIRECTORY_DCIM +
+      File.separator +
+      "DOM"
+    );
+    File videosFolder = new File(storagePath);
+
+    if (!domFolder.exists()) {
+      domFolder.mkdirs();
+    }
+    if (!videosFolder.exists()) {
+      videosFolder.mkdirs();
+    }
+
+    if (!FileUtils.isFileAvailable(storagePath)) {
+      storagePath =
         Environment.getExternalStorageDirectory() +
         File.separator +
         Environment.DIRECTORY_DCIM +
         File.separator;
     }
 
-    DownloadManager downloadManager = DownloadManager.getInstance(null);
+    DownloadManager downloadManager = DownloadManager.getInstance(
+      new DownloadManager.OnDownloadListener() {
+        @Override
+        public void onDownload(DownloadInfo info) {
+          if (info != null && eventSink != null) {
+            Map<String, Object> jsonData = new HashMap<>();
+
+            jsonData.put("key", "PLAYBACK_DOWNLOAD_PROGRESS");
+            jsonData.put("state", info.getDownloadState());
+            jsonData.put("progress", info.getDownloadProgress());
+            String jsonString = new Gson().toJson(jsonData);
+
+            eventSink.success(jsonString);
+          }
+        }
+      }
+    );
 
     H264_DVR_FILE_DATA data = dataList.get(position);
     if (data != null) {
@@ -74,36 +126,44 @@ public class PlayBackClass {
       downloadInfo.setDevId(deviceId);
       downloadInfo.setObj(data);
       downloadInfo.setDownloadType(DOWNLOAD_VIDEO_BY_FILE);
-      downloadInfo.setSaveFileName(galleryPath + fileName);
+      downloadInfo.setSaveFileName(storagePath + fileName);
       downloadManager.addDownload(downloadInfo);
       downloadManager.startDownload();
       result.onSuccess(new ArrayList<>());
     } else {
-      result.onFailed("0", "0");
+      result.onFailed("0", "Error while downloading!");
     }
   }
 
   public PlayBackClass(
     String deviceID,
     ViewGroup viewGroup,
-    String date,
-    String month,
-    String year,
+    String fromDate,
+    String fromMonth,
+    String fromYear,
+    String toDate,
+    String toMonth,
+    String toYear,
     DeviceClass.myDomResultInterface result
   ) {
     this.deviceID = deviceID;
     this.viewGroup = viewGroup;
-    this.date = date;
-    this.month = month;
-    this.year = year;
+    this.fromDate = fromDate;
+    this.fromMonth = fromMonth;
+    this.fromYear = fromYear;
+    this.toDate = toDate;
+    this.toMonth = toMonth;
+    this.toYear = toYear;
     recordManager =
       deviceManager.createRecordPlayer(viewGroup, deviceID, PLAY_DEV_PLAYBACK);
     recordManager.setChnId(0);
+    recordManager.setTouchable(false);
+    recordManager.setBtnPlayVisible(false);
+
     searchRecordByFile();
     new XMRecyclerView(viewGroup.getContext(), null);
     recordManager.setOnMediaManagerListener(
       new MediaManager.OnRecordManagerListener() {
-        @Override
         public void searchResult(PlayerAttribute attribute, Object data) {
           if (data != null) {
             if (data instanceof H264_DVR_FILE_DATA[]) {
@@ -121,7 +181,9 @@ public class PlayBackClass {
         }
 
         @Override
-        public void onMediaPlayState(PlayerAttribute attribute, int state) {}
+        public void onMediaPlayState(PlayerAttribute attribute, int state) {
+          System.out.println("onMediaPlayState");
+        }
 
         @Override
         public void onFailed(
@@ -129,35 +191,82 @@ public class PlayBackClass {
           int msgId,
           int errorId
         ) {
-          if (msgId == 5101) {
+          if (isStartPlaybackCalled) {
+            isStartPlaybackCalled = false;
+            resultCallback.onFailed("0", "ErrorId: "+errorId);
+          } else if (msgId == 5101) {
             result.onFailed("0" + errorId, "No Data Found");
           } else {
             result.onFailed("" + errorId, "Failed to get list from device!");
           }
         }
 
-        @Override
+        //        public void onShowRateAndTime(
+        //          PlayerAttribute attribute,
+        //          boolean isShowTime,
+        //          String time,
+        //          long rate
+        //        ) {}
+
         public void onShowRateAndTime(
           PlayerAttribute attribute,
           boolean isShowTime,
           String time,
-          String rate
-        ) {}
+          long rate
+        ) {
+          if (eventSink != null) {
+            Map<String, Object> jsonData = new HashMap<>();
 
-        @Override
-        public void onVideoBufferEnd(
-          PlayerAttribute attribute,
-          MsgContent ex
-        ) {}
+            jsonData.put("key", "PLAYBACK_STREAM_DATA");
+            jsonData.put("time", time);
+            jsonData.put("rate", rate);
+            jsonData.put("isShowTime", isShowTime);
+            String jsonString = new Gson().toJson(jsonData);
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat(
+              "yyyy-MM-dd HH:mm:ss"
+            );
+            Date parsedDate;
+            try {
+              parsedDate = dateFormat.parse(time);
+            } catch (ParseException e) {
+              throw new RuntimeException(e);
+            }
+
+            Calendar currentTime = Calendar.getInstance();
+            currentTime.setTime(parsedDate);
+            if (currentTime.after(playBackEndTime)) {
+              recordManager.stopPlay();
+            } else {
+              eventSink.success(jsonString);
+            }
+          }
+        }
+
+        public void onVideoBufferEnd(PlayerAttribute attribute, MsgContent ex) {
+          System.out.println("onVideoBufferEnd");
+
+          if (isStartPlaybackCalled) {
+            isStartPlaybackCalled = false;
+            resultCallback.onSuccess(new ArrayList<>());
+          }
+        }
+
+        public void onPlayStateClick(View view) {
+          System.out.println("onPlayStateClick");
+        }
       }
     );
   }
 
-  public static void seekToTime(int times) {
+  public static void seekToTime(
+    int times,
+    DeviceClass.myDomResultInterface resultCb
+  ) {
     Calendar searchTime = Calendar.getInstance();
-    searchTime.set(Calendar.DAY_OF_MONTH, Integer.valueOf(date));
-    searchTime.set(Calendar.MONTH, Integer.valueOf(month) - 1);
-    searchTime.set(Calendar.YEAR, Integer.valueOf(year));
+    searchTime.set(Calendar.DAY_OF_MONTH, Integer.valueOf(fromDate));
+    searchTime.set(Calendar.MONTH, Integer.valueOf(fromMonth) - 1);
+    searchTime.set(Calendar.YEAR, Integer.valueOf(fromYear));
     searchTime.set(Calendar.HOUR_OF_DAY, 0);
     searchTime.set(Calendar.MINUTE, 0);
     searchTime.set(Calendar.SECOND, 0);
@@ -172,6 +281,8 @@ public class PlayBackClass {
     };
 
     int absTime = FunSDK.ToTimeType(time) + times;
+    isStartPlaybackCalled = true;
+    resultCallback = resultCb;
     recordManager.seekToTime(times, absTime);
   }
 
@@ -192,56 +303,83 @@ public class PlayBackClass {
   }
 
   public static void captureImagePlayback() {
-    String galleryPath =
+    String storagePath =
       Environment.getExternalStorageDirectory() +
       File.separator +
       Environment.DIRECTORY_DCIM +
       File.separator +
-      "Camera" +
+      "DOM" +
+      File.separator +
+      "PB_IMAGES" +
       File.separator;
 
-    if (!FileUtils.isFileAvailable(galleryPath)) {
-      galleryPath =
+    File domFolder = new File(
+      Environment.getExternalStorageDirectory() +
+      File.separator +
+      Environment.DIRECTORY_DCIM +
+      File.separator +
+      "DOM"
+    );
+    File imagesFolder = new File(storagePath);
+
+    if (!domFolder.exists()) {
+      domFolder.mkdirs();
+    }
+    if (!imagesFolder.exists()) {
+      imagesFolder.mkdirs();
+    }
+
+    if (!FileUtils.isFileAvailable(storagePath)) {
+      storagePath =
         Environment.getExternalStorageDirectory() +
         File.separator +
         Environment.DIRECTORY_DCIM +
         File.separator;
     }
 
-    recordManager.capture(galleryPath);
+    recordManager.capture(storagePath);
   }
 
-  public static void startPlayRecord(int position) {
+  public static void startPlayRecord(
+    int position,
+    EventSink eventSinkCB,
+    DeviceClass.myDomResultInterface resultCb
+  ) {
+    recordManager.stopPlay();
     H264_DVR_FILE_DATA recordInfo = dataList.get(position);
     Calendar playCalendar = TimeUtils.getNormalFormatCalender(
       recordInfo.getStartTimeOfYear()
     );
-    Calendar endCalendar;
-    endCalendar = Calendar.getInstance();
-    endCalendar.set(Calendar.DAY_OF_MONTH, Integer.valueOf(date));
-    endCalendar.set(Calendar.MONTH, Integer.valueOf(month) - 1);
-    endCalendar.set(Calendar.YEAR, Integer.valueOf(year));
-    endCalendar.setTime(playCalendar.getTime());
-    endCalendar.set(Calendar.HOUR_OF_DAY, 23);
-    endCalendar.set(Calendar.MINUTE, 59);
-    endCalendar.set(Calendar.SECOND, 59);
-    recordManager.startPlay(playCalendar, endCalendar);
+    Calendar playCalendarEndTime = TimeUtils.getNormalFormatCalender(
+      recordInfo.getEndTimeOfYear()
+    );
+    isStartPlaybackCalled = true;
+    resultCallback = resultCb;
+    eventSink = eventSinkCB;
+    playBackEndTime = playCalendarEndTime;
+    recordManager.startPlay(playCalendar, playCalendarEndTime);
+    recordManager.setTouchable(false);
+    recordManager.setBtnPlayVisible(false);
+  }
+
+  public static void stopPlayBack() {
+    recordManager.stopPlay();
   }
 
   public void searchRecordByFile() {
     if (recordManager instanceof DevRecordManager) {
       Calendar searchTime = Calendar.getInstance();
-      searchTime.set(Calendar.DAY_OF_MONTH, Integer.valueOf(date));
-      searchTime.set(Calendar.MONTH, Integer.valueOf(month) - 1);
-      searchTime.set(Calendar.YEAR, Integer.valueOf(year));
+      searchTime.set(Calendar.DAY_OF_MONTH, Integer.valueOf(fromDate));
+      searchTime.set(Calendar.MONTH, Integer.valueOf(fromMonth) - 1);
+      searchTime.set(Calendar.YEAR, Integer.valueOf(fromYear));
       searchTime.set(Calendar.HOUR_OF_DAY, 0);
       searchTime.set(Calendar.MINUTE, 0);
       searchTime.set(Calendar.SECOND, 0);
 
       Calendar endTime = Calendar.getInstance();
-      endTime.set(Calendar.DAY_OF_MONTH, Integer.valueOf(date));
-      endTime.set(Calendar.MONTH, Integer.valueOf(month) - 1);
-      endTime.set(Calendar.YEAR, Integer.valueOf(year));
+      endTime.set(Calendar.DAY_OF_MONTH, Integer.valueOf(toDate));
+      endTime.set(Calendar.MONTH, Integer.valueOf(toMonth) - 1);
+      endTime.set(Calendar.YEAR, Integer.valueOf(toYear));
       endTime.set(Calendar.HOUR_OF_DAY, 23);
       endTime.set(Calendar.MINUTE, 59);
       endTime.set(Calendar.SECOND, 59);

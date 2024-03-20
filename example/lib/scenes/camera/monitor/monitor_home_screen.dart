@@ -5,6 +5,13 @@ import 'package:dom_camera_example/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
+class CameraEntry {
+  final String cameraId;
+  String? cameraState;
+
+  CameraEntry({required this.cameraId, this.cameraState});
+}
+
 class MonitorHomeScreen extends StatefulWidget {
   const MonitorHomeScreen({Key? key}) : super(key: key);
 
@@ -17,7 +24,7 @@ class _MonitorHomeScreenState extends State<MonitorHomeScreen> {
   final _localStorage = Hive.box('dom_camera_storage');
 
   final TextEditingController _cameraIdController = TextEditingController();
-  List<String> usedCameraIds = [];
+  List<CameraEntry> usedCameraIds = [];
   bool isCameraLogin = false;
 
   @override
@@ -26,19 +33,66 @@ class _MonitorHomeScreenState extends State<MonitorHomeScreen> {
     _loadUsedCameraIds();
   }
 
-  void _loadUsedCameraIds() {
+  void _loadUsedCameraIds() async {
     final cameraIds = _localStorage.get('usedCameraIds', defaultValue: []);
-
     for (String deviceId in cameraIds!) {
-      usedCameraIds.add(deviceId);
+      usedCameraIds.add(CameraEntry(cameraId: deviceId, cameraState: "--"));
     }
+    setState(() {});
 
-    setState(() {
-      usedCameraIds;
-    });
+    // for (String deviceId in cameraIds!) {
+    //   final response = await _domCameraPlugin.cameraState(deviceId);
+    //   // _updateCameraIdList(deviceId);
+    //   if (response["isError"]) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       SnackBar(content: Text(response["$deviceId: message"])),
+    //     );
+    //   } else {
+    //     final cameraState = response["state"] as String?;
+    //     final existingEntry = usedCameraIds.firstWhere(
+    //       (entry) => entry.cameraId == deviceId,
+    //       orElse: () => CameraEntry(cameraId: deviceId),
+    //     );
+
+    //     existingEntry.cameraState = cameraState;
+
+    //     setState(() {});
+    //   }
+    // }
   }
 
-  void _updateCameraIdList(String cameraId, [bool remove = false]) {
+  // void _loadUsedCameraIds() async {
+  //   final cameraIds = _localStorage.get('usedCameraIds', defaultValue: []);
+  //   final futures = <Future>[];
+
+  //   for (String deviceId in cameraIds!) {
+  //     futures.add(_getCameraState(deviceId));
+  //   }
+
+  //   await Future.wait(futures);
+
+  //   setState(() {});
+  // }
+
+  // Future<void> _getCameraState(String deviceId) async {
+  //   final response = await _domCameraPlugin.cameraState(deviceId);
+
+  //   if (response["isError"]) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text(response["$deviceId: message"])),
+  //     );
+  //   } else {
+  //     final cameraState = response["state"] as String?;
+  //     final existingEntry = usedCameraIds.firstWhere(
+  //       (entry) => entry.cameraId == deviceId,
+  //       orElse: () => CameraEntry(cameraId: deviceId),
+  //     );
+
+  //     existingEntry.cameraState = cameraState;
+  //   }
+  // }
+
+  void _updateCameraIdList(String cameraId, [bool remove = false]) async {
     final cameraIds = _localStorage.get('usedCameraIds', defaultValue: []);
 
     cameraIds.remove(cameraId);
@@ -52,9 +106,7 @@ class _MonitorHomeScreenState extends State<MonitorHomeScreen> {
 
     _localStorage.put('usedCameraIds', cameraIds);
 
-    setState(() {
-      //usedCameraIds = cameraIds;
-    });
+    setState(() {});
   }
 
   @override
@@ -66,9 +118,7 @@ class _MonitorHomeScreenState extends State<MonitorHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'Monitor Camera',
-      ),
+      appBar: const CustomAppBar(title: 'Monitor Camera'),
       body: Column(
         children: [
           Container(
@@ -91,33 +141,56 @@ class _MonitorHomeScreenState extends State<MonitorHomeScreen> {
                     horizontal: 1.0,
                   ),
                   child: ListTile(
-                      dense: true,
-                      onTap: () {
-                        _cameraIdController.text = usedCameraIds[index];
-                      },
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(4)),
+                    dense: true,
+                    onTap: () {
+                      _cameraIdController.text = usedCameraIds[index].cameraId;
+                    },
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(4)),
+                    ),
+                    tileColor: Theme.of(context).primaryColor.withOpacity(0.8),
+                    textColor: Theme.of(context).secondaryHeaderColor,
+                    iconColor: Theme.of(context).secondaryHeaderColor,
+                    leading: const Icon(
+                      Icons.camera,
+                      size: 25,
+                    ),
+                    title: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          Text(usedCameraIds[index].cameraId),
+                          const SizedBox(width: 8.0),
+                          if (usedCameraIds[index].cameraState == "")
+                            const CircularProgressIndicator()
+                          else
+                            Text(usedCameraIds[index].cameraState!),
+                        ],
                       ),
-                      tileColor:
-                          Theme.of(context).primaryColor.withOpacity(0.8),
-                      textColor: Theme.of(context).secondaryHeaderColor,
-                      iconColor: Theme.of(context).secondaryHeaderColor,
-                      leading: const Icon(
-                        Icons.camera,
-                        size: 25,
-                      ),
-                      title: Text(usedCameraIds[index]),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete_outline),
-                        onPressed: () {
-                          showDeleteConfirmationDialog(
-                            context,
-                            usedCameraIds[index],
-                            () =>
-                                _updateCameraIdList(usedCameraIds[index], true),
-                          );
-                        },
-                      )),
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.refresh),
+                          onPressed: () {
+                            _refreshCameraState(usedCameraIds[index].cameraId);
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline),
+                          onPressed: () {
+                            showDeleteConfirmationDialog(
+                              context,
+                              usedCameraIds[index].cameraId,
+                              () => _updateCameraIdList(
+                                  usedCameraIds[index].cameraId, true),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
                 );
               },
             ),
@@ -138,7 +211,7 @@ class _MonitorHomeScreenState extends State<MonitorHomeScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16.0),
+                      const SizedBox(width: 4.0),
                       ElevatedButton(
                         onPressed: () async {
                           final cameraId = _cameraIdController.text.trim();
@@ -158,7 +231,6 @@ class _MonitorHomeScreenState extends State<MonitorHomeScreen> {
                           setState(() {
                             isCameraLogin = true;
                           });
-
                           final value =
                               await _domCameraPlugin.cameraLogin(cameraId);
 
@@ -190,5 +262,34 @@ class _MonitorHomeScreenState extends State<MonitorHomeScreen> {
         ],
       ),
     );
+  }
+
+  void _refreshCameraState(String cameraId) async {
+    final existingEntryIndex = usedCameraIds.indexWhere(
+      (entry) => entry.cameraId == cameraId,
+    );
+
+    if (existingEntryIndex != -1) {
+      setState(() {
+        usedCameraIds[existingEntryIndex].cameraState = "";
+      });
+    }
+    final response = await _domCameraPlugin.cameraState(cameraId);
+
+    if (response["isError"]) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response["message"])),
+        );
+      }
+    } else {
+      final cameraState = response["state"] as String?;
+
+      if (existingEntryIndex != -1) {
+        setState(() {
+          usedCameraIds[existingEntryIndex].cameraState = cameraState;
+        });
+      }
+    }
   }
 }

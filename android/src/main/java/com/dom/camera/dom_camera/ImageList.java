@@ -34,7 +34,7 @@ public class ImageList {
             new ArrayList<>(Collections.singleton(data.toString()))
           );
         } else {
-          result.onFailed("", "");
+          result.onFailed("0", "Filed to get the Images");
         }
       });
     SearchPictureByFiles();
@@ -52,7 +52,7 @@ public class ImageList {
     endTime.set(Calendar.SECOND, 59);
 
     SearchFileInfo searchFileInfo = new SearchFileInfo();
-    searchFileInfo.setChnId(0);
+    searchFileInfo.setChnId(1);
     searchFileInfo.setStartTime(startTime);
     searchFileInfo.setEndTime(endTime);
     fileManager.searchPictureByFile(deviceId, searchFileInfo);
@@ -63,23 +63,24 @@ public class ImageList {
     DeviceClass.myDomResultInterface result
   ) {
     if (ImageList == null || position >= ImageList.size()) {
-      result.onFailed("0", "0");
+      result.onFailed("0", "Invalid Position");
       return;
     }
-    String galleryPath =
-      Environment.getExternalStorageDirectory() +
-      File.separator +
-      Environment.DIRECTORY_DCIM +
-      File.separator +
-      "Camera" +
-      File.separator;
 
-    if (!FileUtils.isFileAvailable(galleryPath)) {
-      galleryPath =
-        Environment.getExternalStorageDirectory() +
-        File.separator +
-        Environment.DIRECTORY_DCIM +
-        File.separator;
+    String storagePath = Environment.getExternalStorageDirectory() + File.separator +
+            Environment.DIRECTORY_DCIM + File.separator + "DOM" + File.separator +
+            "AL_IMAGES" + File.separator;
+
+    File domFolder = new File(Environment.getExternalStorageDirectory() +
+            File.separator + Environment.DIRECTORY_DCIM + File.separator + "DOM");
+    File imagesFolder = new File(storagePath);
+
+    if (!domFolder.exists()) {domFolder.mkdirs();}
+    if (!imagesFolder.exists()) {imagesFolder.mkdirs();}
+
+    if (!FileUtils.isFileAvailable(storagePath)) {
+      storagePath = Environment.getExternalStorageDirectory() + File.separator +
+              Environment.DIRECTORY_DCIM + File.separator;
     }
 
     H264_DVR_FILE_DATA data = ImageList.get(position);
@@ -95,7 +96,7 @@ public class ImageList {
       downloadInfo.setDevId(deviceId);
       downloadInfo.setObj(data);
       downloadInfo.setDownloadType(DOWNLOAD_VIDEO_BY_FILE);
-      downloadInfo.setSaveFileName(galleryPath + fileName);
+      downloadInfo.setSaveFileName(storagePath + fileName);
       downloadManager.addDownload(downloadInfo);
       downloadManager.startDownload();
       result.onSuccess(new ArrayList<>());
