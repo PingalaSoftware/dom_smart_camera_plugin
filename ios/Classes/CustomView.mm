@@ -153,8 +153,7 @@
     NSString *dateString = [self GetSystemTimeString];
     NSString *file = [self getPhotoPath];
     NSString *pictureFilePath = [file stringByAppendingFormat:@"/%@.jpg",dateString];
-    int resultData =     FUN_MediaSnapImage(self.player, [pictureFilePath UTF8String]);
-    [self saveMediaToPhotosAlbum:pictureFilePath isImage:YES];
+    int resultData = FUN_MediaSnapImage(self.player, [pictureFilePath UTF8String]);
     return resultData;
 }
 

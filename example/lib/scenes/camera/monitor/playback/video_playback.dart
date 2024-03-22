@@ -1,6 +1,5 @@
 import 'package:dom_camera/dom_camera.dart';
 import 'package:dom_camera_example/components/button.dart';
-import 'package:dom_camera_example/scenes/camera/monitor/options/playback_time_widget.dart';
 import 'package:dom_camera_example/scenes/camera/monitor/playback/time_range_seekbar.dart';
 import 'package:dom_camera_example/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';

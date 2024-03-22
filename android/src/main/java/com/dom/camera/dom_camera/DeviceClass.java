@@ -55,7 +55,8 @@ public class DeviceClass {
   public static final int MN_COUNT = 8;
   private int timeCount = MN_COUNT;
   private IPresetManager presetManager;
-
+  static DeviceClass.myDomResultInterface resultCallback;
+  static boolean isStopStreamCalled = false;
   private static DevReportManager devReportManager;
 
   public interface myDomResultInterface {
@@ -142,7 +143,9 @@ public class DeviceClass {
     }
   }
 
-  static void stopStream() {
+  static void stopStream(DeviceClass.myDomResultInterface result) {
+    isStopStreamCalled = true;
+    resultCallback = result;
     monitorManager.destroyPlay();
   }
 
@@ -527,7 +530,12 @@ public class DeviceClass {
     );
     monitorManager.setOnMediaManagerListener(
       new MediaManager.OnMediaManagerListener() {
-        public void onMediaPlayState(PlayerAttribute attribute, int state) {}
+        public void onMediaPlayState(PlayerAttribute attribute, int state) {
+          if(isStopStreamCalled) {
+            if(state == 4) resultCallback.onSuccess(new ArrayList<>());
+            else resultCallback.onFailed("0", "Error: state="+state);
+          }
+        }
 
         public void onFailed(
           PlayerAttribute attribute,

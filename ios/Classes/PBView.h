@@ -18,7 +18,7 @@
                    arguments:(id)args
              binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger;
 
--(void)startPlayBack:(NSDate *)date msgHandle:(int)msgHandle devId:(NSString*)devId;
+-(void)startPlayBack:(int)msgHandle devId:(NSString*)devId;
 -(void)seekToTime:(NSInteger)addtime;
 -(void)startPlayCloudVideo:(NSDate *)date msgHandle:(int)msgHandle devId:(NSString*)devId;
 //-(void)PlaybackList:(NSDate *)date completion:(void (^)(NSArray *))completion;

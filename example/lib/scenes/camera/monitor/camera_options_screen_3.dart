@@ -38,6 +38,7 @@ class _CameraOptionScreen3State extends State<CameraOptionScreen3> {
               padding: const EdgeInsets.only(right: 8.0),
               child: GestureDetector(
                 onTap: () {
+                  // Only captures if live stream is running
                   final data = _domCameraPlugin.captureImageAndSaveLocal();
                   if (data["isError"]) {
                     ScaffoldMessenger.of(context).showSnackBar(

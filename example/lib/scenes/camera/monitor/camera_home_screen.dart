@@ -40,7 +40,7 @@ class _CameraHomeScreenState extends State<CameraHomeScreen>
 
   @override
   void dispose() async {
-    _domCameraPlugin.stopStreaming();
+    await _domCameraPlugin.stopStreaming();
 
     super.dispose();
   }
@@ -54,11 +54,16 @@ class _CameraHomeScreenState extends State<CameraHomeScreen>
     // _enableFullScreenAndLandscape();
 
     // NEW START
-    _startLiveView();
 
-    eventBus.on<StopLiveStreamEvent>().listen((event) {
+    setState(() {
+      _isLoading = true;
+    });
+    // On loading the video player may not be properly attached to UI so added little bit delay
+    Future.delayed(const Duration(milliseconds: 300), () => {_startLiveView()});
+
+    eventBus.on<StopLiveStreamEvent>().listen((event) async {
       if (!_isLiveView) return;
-      _domCameraPlugin.stopStreaming();
+      await _domCameraPlugin.stopStreaming();
 
       _stopLiveView();
     });
@@ -83,28 +88,25 @@ class _CameraHomeScreenState extends State<CameraHomeScreen>
       return;
     }
 
-    if (isFirstTime) {
-      setState(() {
-        isFirstTime = false;
-      });
-      _domCameraPlugin.stopStreaming();
-      Future.delayed(
-          const Duration(milliseconds: 800), () => {_startLiveView()});
-      return;
-    }
+    // if (isFirstTime) {
+    //   setState(() {
+    //     isFirstTime = false;
+    //   });
+    //   await _domCameraPlugin.stopStreaming();
+    //   Future.delayed(
+    //       const Duration(milliseconds: 800), () => {_startLiveView()});
+    //   return;
+    // }
 
     setState(() {
       _isLoading = false;
-    });
-
-    setState(() {
       _isLiveView = true;
     });
   }
 
-  void _stopLiveView() {
+  void _stopLiveView() async {
     if (!_isLiveView) return;
-    _domCameraPlugin.stopStreaming();
+    await _domCameraPlugin.stopStreaming();
 
     setState(() {
       _isLiveView = false;
@@ -112,24 +114,22 @@ class _CameraHomeScreenState extends State<CameraHomeScreen>
   }
   // NEW END
 
-  void _enableFullScreenAndLandscape() {
-    _domCameraPlugin.stopStreaming();
+  void _enableFullScreenAndLandscape() async {
+    await _domCameraPlugin.stopStreaming();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
 
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-    _domCameraPlugin.startStreaming();
+    await _domCameraPlugin.startStreaming();
   }
 
   void _restoreSystemSettings() {
-    // _domCameraPlugin.stopStreaming();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
         overlays: SystemUiOverlay.values);
 
     SystemChrome.setPreferredOrientations(DeviceOrientation.values);
-    // _domCameraPlugin.startStreaming();
   }
 
   @override

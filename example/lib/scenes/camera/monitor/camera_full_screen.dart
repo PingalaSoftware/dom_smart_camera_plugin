@@ -45,8 +45,8 @@ class _CameraFullScreenState extends State<CameraFullScreen>
   }
 
   @override
-  void dispose() {
-    _domCameraPlugin.stopStreaming();
+  void dispose() async {
+    await _domCameraPlugin.stopStreaming();
     WidgetsBinding.instance.removeObserver(this);
     _restoreSystemSettings();
     super.dispose();

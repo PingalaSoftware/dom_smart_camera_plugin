@@ -470,7 +470,31 @@ public class DomCameraPlugin
         );
         break;
       case STOP_STREAM:
-        DeviceClass.stopStream();
+        if (isResultAvailable("STOP_STREAM")) {
+          result.error("0", "Request is in progress", null);
+          break;
+        }
+        storeResult("STOP_STREAM", result);
+
+        DeviceClass.stopStream(
+          new DeviceClass.myDomResultInterface() {
+            @Override
+            public void onSuccess(List<String> dataList) {
+              if (isResultAvailable("STOP_STREAM")) {
+                Result tempResult = getResultAndClear("STOP_STREAM");
+                tempResult.success(dataList);
+              }
+            }
+
+            @Override
+            public void onFailed(String errorId, String message) {
+              if (isResultAvailable("STOP_STREAM")) {
+                Result tempResult = getResultAndClear("STOP_STREAM");
+                tempResult.error(errorId, message, null);
+              }
+            }
+          }
+        );
         break;
       case IS_FULL_SCREEN_STREAMING:
         if (isResultAvailable("IS_FULL_SCREEN_STREAMING")) {

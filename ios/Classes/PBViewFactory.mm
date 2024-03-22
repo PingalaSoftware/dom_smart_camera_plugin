@@ -29,8 +29,8 @@
                                     binaryMessenger:_messenger];
     return _PBView;
 }
--(void)startPlayBack:(NSDate *)date msgHandle:(int)msgHandle devId:(NSString*)devId {
-    [_PBView startPlayBack:date msgHandle:msgHandle devId:devId];
+-(void)startPlayBack:(int)msgHandle devId:(NSString*)devId {
+    [_PBView startPlayBack:msgHandle devId:devId];
 }
 -(void)startPlayCloudVideo:(NSDate *)date msgHandle:(int)msgHandle devId:(NSString*)devId {
     [_PBView startPlayCloudVideo:date msgHandle:msgHandle devId:devId];

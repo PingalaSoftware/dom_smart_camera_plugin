@@ -36,7 +36,7 @@ public class PlayBackClass {
   String deviceID;
   ViewGroup viewGroup;
   DeviceManager deviceManager = DeviceManager.getInstance();
-  static RecordManager recordManager;
+  static RecordManager recordManager = null;
   static List<H264_DVR_FILE_DATA> dataList;
   static String fromDate;
   static String fromMonth;
@@ -154,6 +154,7 @@ public class PlayBackClass {
     this.toDate = toDate;
     this.toMonth = toMonth;
     this.toYear = toYear;
+    if(recordManager != null) recordManager.stopPlay();
     recordManager =
       deviceManager.createRecordPlayer(viewGroup, deviceID, PLAY_DEV_PLAYBACK);
     recordManager.setChnId(0);

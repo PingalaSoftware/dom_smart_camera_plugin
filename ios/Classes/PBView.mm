@@ -24,9 +24,9 @@
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
-              viewIdentifier:(int64_t)viewId
-                   arguments:(id)args
-             binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger {
+               viewIdentifier:(int64_t)viewId
+                    arguments:(id)args
+              binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger {
     self = [super init];
     if (self) {
         _view = [[DisplayView alloc] initWithFrame:frame];
@@ -45,24 +45,29 @@
     [_view removeFromSuperview];
 }
 -(void)seekToTime:(NSInteger)addtime{
-        FUN_MediaSeekToTime(self.player, (int)addtime, 0, 0);
+    FUN_MediaSeekToTime(self.player, (int)addtime, 0, 0);
 }
--(void)startPlayBack:(NSDate *)date msgHandle:(int)msgHandle devId:(NSString*)devId{
+-(void)startPlayBack:(int)msgHandle devId:(NSString*)devId{
     [self stop];
     struct H264_DVR_FINDINFO requestInfo;
     memset(&requestInfo, 0, sizeof(H264_DVR_FINDINFO));
+   
+    NSDate *currentDate = [NSDate date];
+    NSCalendar *calendar = [NSCalendar currentCalendar];
+    NSDateComponents *components = [calendar components:NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay fromDate:currentDate];
+    
     requestInfo.nChannelN0 = self.channel;
     requestInfo.nFileType = 0;
-    requestInfo.startTime.dwYear = [self getYearFormDate:date];
-    requestInfo.startTime.dwMonth = [self getMonthFormDate:date];
-    requestInfo.startTime.dwDay = [self getDayFormDate:date];
+    requestInfo.startTime.dwYear = (int)[components year];
+    requestInfo.startTime.dwMonth = (int)[components month];
+    requestInfo.startTime.dwDay = (int)[components day];
     requestInfo.startTime.dwHour = 0;
     requestInfo.startTime.dwMinute = 0;
     requestInfo.startTime.dwSecond = 0;
     
-    requestInfo.endTime.dwYear = [self getYearFormDate:date];
-    requestInfo.endTime.dwMonth = [self getMonthFormDate:date];
-    requestInfo.endTime.dwDay = [self getDayFormDate:date];
+    requestInfo.endTime.dwYear = (int)[components year];
+    requestInfo.endTime.dwMonth = (int)[components month];
+    requestInfo.endTime.dwDay = (int)[components day];
     requestInfo.endTime.dwHour = 23;
     requestInfo.endTime.dwMinute = 59;
     requestInfo.endTime.dwSecond = 59;
@@ -73,7 +78,7 @@
     return [self start:msgHandle devId:devId];
 }
 -(int)start:(int)msgHandle devId:(NSString*)devId
-{    
+{
     self.liveStatus = YES;
     self.player = FUN_MediaNetRecordPlayByTime(msgHandle, [devId UTF8String], &Info, (__bridge LP_WND_OBJ)_view);
     return self.player;
@@ -88,9 +93,6 @@
     beginTime.hour = [self getHourFormDate:date];
     beginTime.minute = [self getMinuteFormDate:date];
     beginTime.second = [self getSecondFormDate:date];
-//    beginTime.hour = 0;
-//    beginTime.minute = 0;
-//    beginTime.second = 0;
     
     endTime.year = [self getYearFormDate:date];
     endTime.month = [self getMonthFormDate:date];
