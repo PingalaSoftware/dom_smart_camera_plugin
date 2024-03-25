@@ -450,7 +450,12 @@ class MethodChannelDomCamera extends DomCameraPlatform {
         "password": account["password"],
       });
 
-      await methodChannel.invokeMethod('CAMERA_LOGIN', {"cameraId": cameraId});
+      List dataList = await methodChannel
+          .invokeMethod('CAMERA_LOGIN', {"cameraId": cameraId});
+      if (Platform.isIOS && dataList[0] == false) {
+        return {"isError": true, "message": dataList[1]};
+      }
+
       initializedCamera = cameraId;
       isUserLogged = true;
 

@@ -740,32 +740,32 @@
 -(void)OnFunSDKResult:(NSNumber *) pParam{
     NSInteger nAddr = [pParam integerValue];
     MsgContent *msg = (MsgContent *)nAddr;
-//    if (msg) {
-//        NSLog(@"##_____________________");
-//        NSLog(@"_____________________");
-//        NSLog(@"_____________________");
-//        NSLog(@"_____________________");
-//        NSLog(@"_____________________");
-//        NSLog(@"_____________________");
-//        NSLog(@"_____________________");
-//        NSLog(@"______MAIN_______________");
-//        NSLog(@"MSG -- %d", msg->id);
-//        
-//        
-//        NSLog(@"param1 %d", msg->param1);
-//        NSLog(@"param2 %d", msg->param2);
-//        NSLog(@"param3 %d", msg->param3);
-//        NSLog(@"szStr %s", msg->szStr);
-//        NSLog(@"pObject %s", msg->pObject);
-//        
-//        NSLog(@"_____________________");
-//        NSLog(@"_____________________");
-//        NSLog(@"_____________________");
-//        NSLog(@"_____________________");
-//        NSLog(@"_____________________##");
-//    } else {
-//        NSLog(@"msg is nil");
-//    }
+    // if (msg) {
+    //     NSLog(@"##_____________________");
+    //     NSLog(@"_____________________");
+    //     NSLog(@"_____________________");
+    //     NSLog(@"_____________________");
+    //     NSLog(@"_____________________");
+    //     NSLog(@"_____________________");
+    //     NSLog(@"_____________________");
+    //     NSLog(@"______MAIN_______________");
+    //     NSLog(@"MSG -- %d", msg->id);
+        
+        
+    //     NSLog(@"param1 %d", msg->param1);
+    //     NSLog(@"param2 %d", msg->param2);
+    //     NSLog(@"param3 %d", msg->param3);
+    //     NSLog(@"szStr %s", msg->szStr);
+    //     NSLog(@"pObject %s", msg->pObject);
+        
+    //     NSLog(@"_____________________");
+    //     NSLog(@"_____________________");
+    //     NSLog(@"_____________________");
+    //     NSLog(@"_____________________");
+    //     NSLog(@"_____________________##");
+    // } else {
+    //     NSLog(@"msg is nil");
+    // }
     
     switch (msg->id) {
         case EMSG_STOP_PLAY:{
@@ -823,7 +823,12 @@
         }
             break;
         case EMSG_DEV_LOGIN: {
-            if (flutterResult) {
+            if(msg->param1 < 0) {
+                if (flutterResult) {
+                    flutterResult(@[@false, @"Device is offline"]);
+                    flutterResult = nil;
+                }
+            } else if (flutterResult) {
                 flutterResult(@[@1]);
                 flutterResult = nil;
             }
